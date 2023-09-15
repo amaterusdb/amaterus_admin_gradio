@@ -448,6 +448,7 @@ def launch_add_program_niconico_video(
                 str(owner.id),
                 owner.nickname,
                 video.registeredAt.astimezone(JST).isoformat(),
+                video.thumbnail.url,
             ]
 
         def handle_add_niconico_video_button_clicked(
@@ -486,6 +487,7 @@ def launch_add_program_niconico_video(
                 remote_niconico_account_id_text_field,
                 niconico_account_name_text_field,
                 start_time_text_field,
+                thumbnail_url_text_field,
             ],
         )
         clear_project_field_button.add(
@@ -505,6 +507,7 @@ def launch_add_program_niconico_video(
                 remote_niconico_account_id_text_field,
                 niconico_account_name_text_field,
                 start_time_text_field,
+                thumbnail_url_text_field,
             ],
         )
 
