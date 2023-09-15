@@ -242,7 +242,7 @@ def main() -> None:
         level=log_level,
     )
 
-    logger = getLogger()
+    logger = Logger(__file__)
     setup_logger(
         logger=logger,
         log_level=log_level,
