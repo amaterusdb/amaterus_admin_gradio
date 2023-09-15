@@ -28,9 +28,13 @@ class InitialDataResponseProject(BaseModel):
     id: str
     name: str
 
+class InitialDataResponsePerson(BaseModel):
+    id: str
+    name: str
 
 class InitialDataResponseData(BaseModel):
     project_list: list[InitialDataResponseProject]
+    person_list: list[InitialDataResponsePerson]
 
 
 class InitialDataResponse(BaseModel):
@@ -44,6 +48,11 @@ def fetch_initial_data() -> InitialDataResponseData:
             "query": """
 query {
     project_list: projects {
+        id
+        name
+    }
+
+    person_list: persons {
         id
         name
     }
@@ -123,29 +132,95 @@ def launch_add_youtube_live(
     initial_data = fetch_initial_data()
 
     with gr.Blocks() as demo:
-        gr.Markdown("Add YouTube Live")
+        gr.Markdown("# プログラムに配信アーカイブを追加")
         with gr.Row():
-            project_drop = gr.Dropdown(
-                choices=list(
-                    map(
-                        lambda project: (project.name, project.id),
-                        initial_data.project_list,
-                    ),
-                ),
-                label="Project",
-            )
-        with gr.Row():
-            program_drop = gr.Dropdown(
-                label="Program",
-                interactive=True,
-            )
+            with gr.Column():
+                with gr.Row():
+                    clear_youtube_live_field_button = gr.ClearButton(
+                        value="以下のフィールドをクリア",
+                    )
+                with gr.Row():
+                    youtube_live_url_or_id_text_field = gr.Textbox(
+                        label="YouTube Live URL または ID",
+                        interactive=True,
+                    )
+                with gr.Row():
+                    fetch_youtube_live_data_button = gr.Button(
+                        value="データベース または YouTube から配信情報を取得",
+                    )
+                with gr.Row():
+                    source_text_field = gr.Textbox(
+                        label="情報源",
+                        interactive=False,
+                    )
+                    youtube_live_id_text_field = gr.Textbox(
+                        label="データベース上のID",
+                        interactive=False,
+                    )
+                with gr.Row():
+                    youtube_live_id_text_field = gr.Textbox(
+                        label="タイトル",
+                        interactive=False,
+                    )
+                with gr.Row():
+                    remote_youtube_channel_id_text_field = gr.Textbox(
+                        label="YouTube上のチャンネルID",
+                        interactive=False,
+                    )
+                    youtube_channel_id_text_field = gr.Textbox(
+                        label="データベース上のチャンネルID",
+                        interactive=False,
+                    )
+                with gr.Row():
+                    start_time_text_field = gr.Textbox(
+                        label="開始時間",
+                        interactive=False,
+                    )
+                    end_time_text_field = gr.Textbox(
+                        label="終了時間",
+                        interactive=False,
+                    )
+
+            with gr.Column():
+                with gr.Row():
+                    clear_project_field_button = gr.ClearButton(
+                        value="以下のフィールドをクリア",
+                    )
+                with gr.Row():
+                    project_drop = gr.Dropdown(
+                        label="プロジェクト",
+                        interactive=True,
+                        choices=list(
+                            map(
+                                lambda project: (project.name, project.id),
+                                initial_data.project_list,
+                            ),
+                        ),
+                    )
+                with gr.Row():
+                    program_drop = gr.Dropdown(
+                        label="プログラム",
+                        interactive=True,
+                    )
+                with gr.Row():
+                    person_drop = gr.Dropdown(
+                        label="放送者",
+                        interactive=True,
+                        choices=list(
+                            map(
+                                lambda person: (person.name, person.id),
+                                initial_data.person_list,
+                            ),
+                        ),
+                    )
 
         def project_changed(
             project_id: str,
         ) -> Any:
-            if not project_id:
+            if project_id is None or len(project_id) == 0:
                 return gr.Dropdown.update(
                     value=None,
+                    choices=None,
                 )
 
             project = fetch_project_data(
@@ -163,6 +238,26 @@ def launch_add_youtube_live(
                     ),
                 ),
             )
+
+        clear_youtube_live_field_button.add(
+            components=[
+                youtube_live_url_or_id_text_field,
+                source_text_field,
+                youtube_live_id_text_field,
+                youtube_live_id_text_field,
+                remote_youtube_channel_id_text_field,
+                youtube_channel_id_text_field,
+                start_time_text_field,
+                end_time_text_field,
+            ],
+        )
+        clear_project_field_button.add(
+            components=[
+                project_drop,
+                program_drop,
+                person_drop,
+            ],
+        )
 
         project_drop.select(
             fn=project_changed, inputs=project_drop, outputs=program_drop
