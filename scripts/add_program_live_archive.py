@@ -192,11 +192,112 @@ def fetch_youtube_live_data(
     return ytlive_api_video_response
 
 
+class AddProgramLiveArchiveResponseProgramLiveArchive(BaseModel):
+    id: str
+
+
+class AddProgramLiveArchiveResponseData(BaseModel):
+    program_live_archive: AddProgramLiveArchiveResponseProgramLiveArchive
+
+
+class AddProgramLiveArchiveResponse(BaseModel):
+    data: AddProgramLiveArchiveResponseData
+
+
+def add_program_live_archive(
+    program_id: str,
+    person_id: str,
+    start_time: datetime,
+    end_time: datetime,
+    remote_youtube_video_id: str,
+    title: str,
+    remote_youtube_channel_id: str,
+    youtube_channel_name: str,
+    hasura_admin_secret: str,
+) -> AddProgramLiveArchiveResponseProgramLiveArchive:
+    res = requests.post(
+        "https://amaterus-hasura.aoirint.com/v1/graphql",
+        headers={
+            "X-Hasura-Admin-Secret": hasura_admin_secret,
+        },
+        json={
+            "query": """
+mutation A(
+  $programId: uuid!
+  $personId: uuid!
+  $startTime: timestamptz!
+  $endTime: timestamptz!
+  $remoteYoutubeVideoId: String!
+  $title: String!
+  $remoteYoutubeChannelId: String!
+  $youtubeChannelName: String!
+) {
+    program_live_archive: insert_program_live_archives_one(
+        object: {
+            program_id: $programId
+            person_id: $personId
+            start_time: $startTime
+            end_time: $endTime
+            youtube_live: {
+                data: {
+                    remote_youtube_video_id: $remoteYoutubeVideoId
+                    title: $title
+                    start_time: $startTime
+                    end_time: $endTime
+                    youtube_channel: {
+                        data: {
+                            remote_youtube_channel_id: $remoteYoutubeChannelId
+                            name: $youtubeChannelName
+                        }
+                        on_conflict: {
+                            constraint: youtube_channels_youtube_channel_id_key
+                            update_columns: [
+                                name
+                            ]
+                        }
+                    }
+                }
+                on_conflict: {
+                    constraint: youtube_lives_remote_youtube_video_id_key
+                    update_columns: [
+                        title
+                        start_time
+                        end_time
+                    ]
+                }
+            }
+        }
+    ) {
+        id
+    }
+}
+""",
+            "variables": {
+                "programId": program_id,
+                "personId": person_id,
+                "startTime": start_time.isoformat(),
+                "endTime": end_time.isoformat(),
+                "remoteYoutubeVideoId": remote_youtube_video_id,
+                "title": title,
+                "remoteYoutubeChannelId": remote_youtube_channel_id,
+                "youtubeChannelName": youtube_channel_name,
+            },
+        },
+    )
+    print(res.json())
+    res.raise_for_status()
+    add_program_live_archive_response = AddProgramLiveArchiveResponse.model_validate(
+        res.json()
+    )
+    return add_program_live_archive_response.data.program_live_archive
+
+
 def launch_add_youtube_live(
     args: LaunchAddYouTubeLiveArgument,
     logger: Logger,
 ) -> None:
     youtube_api_key = args.youtube_api_key
+    hasura_admin_secret = args.hasura_admin_secret
 
     initial_data = fetch_initial_data()
 
@@ -218,15 +319,10 @@ def launch_add_youtube_live(
                         value="データベース または YouTube から配信情報を取得",
                     )
                 with gr.Row():
-                    source_text_field = gr.Textbox(
-                        label="情報源",
+                    remote_youtube_video_id_text_field = gr.Textbox(
+                        label="YouTube Video ID",
                         interactive=False,
                     )
-                    youtube_live_id_text_field = gr.Textbox(
-                        label="データベース上のID",
-                        interactive=False,
-                    )
-                with gr.Row():
                     youtube_live_title_text_field = gr.Textbox(
                         label="タイトル",
                         interactive=False,
@@ -236,11 +332,6 @@ def launch_add_youtube_live(
                         label="YouTube上のチャンネルID",
                         interactive=False,
                     )
-                    youtube_channel_id_text_field = gr.Textbox(
-                        label="データベース上のチャンネルID",
-                        interactive=False,
-                    )
-                with gr.Row():
                     youtube_channel_name_text_field = gr.Textbox(
                         label="チャンネル名",
                         interactive=False,
@@ -293,7 +384,7 @@ def launch_add_youtube_live(
                         variant="primary",
                     )
                 with gr.Row():
-                    added_youtube_live_id_text_field = gr.Textbox(
+                    added_program_live_archive_id_text_field = gr.Textbox(
                         label="追加された配信アーカイブのデータベース上のID",
                         interactive=False,
                     )
@@ -365,27 +456,46 @@ def launch_add_youtube_live(
                     )
 
             return [
-                "YouTube",
                 item.id,
                 youtube_live_title,
                 remote_youtube_channel_id,
-                "",
                 youtube_channel_title,
                 youtube_live_start_time,
                 youtube_live_end_time,
+                hasura_admin_secret,
             ]
 
-        def handle_add_live_archive_button_clicked() -> Any:
-            pass
+        def handle_add_live_archive_button_clicked(
+            remote_youtube_video_id: str,
+            youtube_live_title: str,
+            remote_youtube_channel_id: str,
+            youtube_channel_name: str,
+            start_time_string: str,
+            end_time_string: str,
+            program_id: str,
+            person_id: str,
+        ) -> Any:
+            program_live_archive = add_program_live_archive(
+                program_id=program_id,
+                person_id=person_id,
+                start_time=datetime.fromisoformat(start_time_string),
+                end_time=datetime.fromisoformat(end_time_string),
+                remote_youtube_video_id=remote_youtube_video_id,
+                title=youtube_live_title,
+                remote_youtube_channel_id=remote_youtube_channel_id,
+                youtube_channel_name=youtube_channel_name,
+            )
+
+            return [
+                program_live_archive.id,
+            ]
 
         clear_youtube_live_field_button.add(
             components=[
                 youtube_live_url_or_id_text_field,
-                source_text_field,
+                remote_youtube_video_id_text_field,
                 youtube_live_title_text_field,
-                youtube_live_id_text_field,
                 remote_youtube_channel_id_text_field,
-                youtube_channel_id_text_field,
                 start_time_text_field,
                 end_time_text_field,
             ],
@@ -402,11 +512,9 @@ def launch_add_youtube_live(
             fn=handle_fetch_youtube_live_data_button_clicked,
             inputs=[youtube_live_url_or_id_text_field],
             outputs=[
-                source_text_field,
-                youtube_live_id_text_field,
+                remote_youtube_video_id_text_field,
                 youtube_live_title_text_field,
                 remote_youtube_channel_id_text_field,
-                youtube_channel_id_text_field,
                 youtube_channel_name_text_field,
                 start_time_text_field,
                 end_time_text_field,
@@ -415,6 +523,19 @@ def launch_add_youtube_live(
 
         add_live_archive_button.click(
             fn=handle_add_live_archive_button_clicked,
+            inputs=[
+                remote_youtube_video_id_text_field,
+                youtube_live_title_text_field,
+                remote_youtube_channel_id_text_field,
+                youtube_channel_name_text_field,
+                start_time_text_field,
+                end_time_text_field,
+                program_drop,
+                person_drop,
+            ],
+            outputs=[
+                added_program_live_archive_id_text_field,
+            ],
         )
 
         project_drop.select(
