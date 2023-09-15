@@ -8,6 +8,7 @@ from typing import Any
 import gradio as gr
 import requests
 from amaterus_admin_gradio.utility.logging_utility import setup_logger
+from dotenv import load_dotenv
 from pydantic import BaseModel
 
 
@@ -196,9 +197,18 @@ def load_app_config_from_env() -> AppConfig:
 
 
 def main() -> None:
-    app_config = load_app_config_from_env()
-
     parser = ArgumentParser()
+    parser.add_argument(
+        "--env_file",
+        type=Path,
+    )
+    pre_args, _ = parser.parse_known_args()
+
+    env_file: Path | None = pre_args.env_file
+    if env_file is not None:
+        load_dotenv(env_file)
+
+    app_config = load_app_config_from_env()
     parser.add_argument(
         "--log_level",
         type=int,
