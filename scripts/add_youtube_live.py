@@ -1,5 +1,4 @@
-from argparse import ArgumentParser, Namespace
-
+from argparse import ArgumentParser
 
 def main():
     parser = ArgumentParser()
