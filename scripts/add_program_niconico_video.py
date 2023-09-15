@@ -168,8 +168,8 @@ def fetch_niconico_video_data(
         if len(remote_niconico_content_id) == 0:
             raise Exception(f"Invalid URL: {niconico_video_url_or_id}")
     else:
-        if not re.match(r"sm\d+", niconico_video_url_or_id) or not re.match(
-            r"so\d+", niconico_video_url_or_id
+        if not re.match(r"^sm\d+$", niconico_video_url_or_id) and not re.match(
+            r"^so\d+$", niconico_video_url_or_id
         ):
             raise Exception(f"Invalid Niconico video ID: {niconico_video_url_or_id}")
 
