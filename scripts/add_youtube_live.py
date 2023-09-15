@@ -3,7 +3,10 @@ import os
 from argparse import ArgumentParser
 from logging import Logger, getLogger
 from pathlib import Path
+from typing import Any
 
+import gradio as gr
+import requests
 from amaterus_admin_gradio.utility.logging_utility import setup_logger
 from pydantic import BaseModel
 
@@ -20,11 +23,149 @@ class LaunchAddYouTubeLiveArgument(BaseModel):
     hasura_admin_secret: str
 
 
+class InitialDataResponseProject(BaseModel):
+    id: str
+    name: str
+
+
+class InitialDataResponseData(BaseModel):
+    project_list: list[InitialDataResponseProject]
+
+
+class InitialDataResponse(BaseModel):
+    data: InitialDataResponseData
+
+
+def fetch_initial_data() -> InitialDataResponseData:
+    res = requests.post(
+        "https://amaterus-hasura.aoirint.com/v1/graphql",
+        json={
+            "query": """
+query {
+    project_list: projects {
+        id
+        name
+    }
+}
+""",
+        },
+    )
+    res.raise_for_status()
+    initial_data_response = InitialDataResponse.model_validate(res.json())
+    return initial_data_response.data
+
+
+class ProjectDataResponseProgram(BaseModel):
+    id: str
+    title: str
+
+
+class ProjectDataResponseProgramProject(BaseModel):
+    program: ProjectDataResponseProgram
+
+
+class ProjectDataResponseProject(BaseModel):
+    program_project_list: list[ProjectDataResponseProgramProject]
+
+
+class ProjectDataResponseData(BaseModel):
+    project: ProjectDataResponseProject
+
+
+class ProjectDataResponse(BaseModel):
+    data: ProjectDataResponseData
+
+
+def fetch_project_data(
+    project_id: str,
+) -> ProjectDataResponseProject:
+    res = requests.post(
+        "https://amaterus-hasura.aoirint.com/v1/graphql",
+        json={
+            "query": """
+query A(
+    $projectId: uuid!
+) {
+    project: projects_by_pk(
+        id: $projectId
+    ) {
+        program_project_list: program_projects(
+            order_by: {
+                program: {
+                    start_time: desc
+                }
+            }
+        ) {
+            program {
+                id
+                title
+            }
+        }
+    }
+}
+""",
+            "variables": {
+                "projectId": project_id,
+            },
+        },
+    )
+    res.raise_for_status()
+    project_data_response = ProjectDataResponse.model_validate(res.json())
+    return project_data_response.data.project
+
+
 def launch_add_youtube_live(
     args: LaunchAddYouTubeLiveArgument,
     logger: Logger,
-):
+) -> None:
     logger.info("!!!")
+    initial_data = fetch_initial_data()
+
+    with gr.Blocks() as demo:
+        gr.Markdown("Add YouTube Live")
+        with gr.Row():
+            project_drop = gr.Dropdown(
+                choices=list(
+                    map(
+                        lambda project: (project.name, project.id),
+                        initial_data.project_list,
+                    ),
+                ),
+                label="Project",
+            )
+        with gr.Row():
+            program_drop = gr.Dropdown(
+                label="Program",
+            )
+
+        def project_changed(
+            project_id: str,
+        ) -> Any:
+            if not project_id:
+                program_drop.update(
+                    value=None,
+                )
+                return
+
+            project = fetch_project_data(
+                project_id=project_id,
+            )
+
+            return gr.Dropdown.update(
+                choices=list(
+                    map(
+                        lambda program_project: (
+                            program_project.program.title,
+                            program_project.program.id,
+                        ),
+                        project.program_project_list,
+                    ),
+                ),
+            )
+
+        project_drop.select(project_changed, inputs=project_drop, outputs=program_drop)
+
+    demo.launch()
 
 
 def load_app_config_from_env() -> AppConfig:
@@ -54,7 +195,7 @@ def load_app_config_from_env() -> AppConfig:
     )
 
 
-def main():
+def main() -> None:
     app_config = load_app_config_from_env()
 
     parser = ArgumentParser()

@@ -1,5 +1,6 @@
 import datetime
 import logging
+from pathlib import Path
 
 
 class Iso8601WithTimezoneFormatter(logging.Formatter):
@@ -18,7 +19,7 @@ class Iso8601WithTimezoneFormatter(logging.Formatter):
 def setup_logger(
     logger: logging.Logger,
     log_level: int,
-    log_file: str | None,
+    log_file: str | Path | None,
 ) -> None:
     logger.setLevel(log_level)
 
