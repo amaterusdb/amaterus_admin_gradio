@@ -143,10 +143,9 @@ def launch_add_youtube_live(
             project_id: str,
         ) -> Any:
             if not project_id:
-                program_drop.update(
+                return gr.Dropdown.update(
                     value=None,
                 )
-                return
 
             project = fetch_project_data(
                 project_id=project_id,
