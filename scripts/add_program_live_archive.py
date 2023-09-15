@@ -1,15 +1,20 @@
 import logging
 import os
 from argparse import ArgumentParser
+from datetime import datetime
 from logging import Logger
 from pathlib import Path
 from typing import Any
+from urllib.parse import parse_qs, urlparse
+from zoneinfo import ZoneInfo
 
 import gradio as gr
 import requests
 from amaterus_admin_gradio.utility.logging_utility import setup_logger
 from dotenv import load_dotenv
 from pydantic import BaseModel
+
+JST = ZoneInfo("Asia/Tokyo")
 
 
 class AppConfig(BaseModel):
@@ -126,11 +131,73 @@ query A(
     return project_data_response.data.project
 
 
+class YoutubeApiVideoResponseItemSnippet(BaseModel):
+    title: str
+    channelId: str
+    channelTitle: str
+    liveBroadcastContent: str
+
+
+class YoutubeApiVideoResponseLiveStreamingDetails(BaseModel):
+    actualStartTime: datetime | None = None
+    actualEndTime: datetime | None = None
+
+
+class YoutubeApiVideoResponseItem(BaseModel):
+    id: str
+    snippet: YoutubeApiVideoResponseItemSnippet | None = None
+    liveStreamingDetails: YoutubeApiVideoResponseLiveStreamingDetails | None = None
+
+
+class YoutubeApiVideoResponse(BaseModel):
+    items: list[YoutubeApiVideoResponseItem]
+
+
+def fetch_youtube_live_data(
+    youtube_live_url_or_id: str,
+    youtube_api_key: str,
+) -> YoutubeApiVideoResponse:
+    youtube_live_url_or_id = youtube_live_url_or_id.strip()
+
+    remote_youtube_video_id: str | None = None
+    if youtube_live_url_or_id.startswith("https://"):
+        urlp = urlparse(youtube_live_url_or_id)
+        if urlp.netloc != "www.youtube.com":
+            raise Exception(f"Invalid URL: {youtube_live_url_or_id}")
+
+        remote_youtube_video_id_param_list = parse_qs(urlp.query).get("v")
+        if (
+            remote_youtube_video_id_param_list is None
+            or len(remote_youtube_video_id_param_list) == 0
+        ):
+            raise Exception(f"Invalid URL: {youtube_live_url_or_id}")
+
+        remote_youtube_video_id = remote_youtube_video_id_param_list[0]
+    else:
+        if "," in youtube_live_url_or_id:
+            raise Exception(f"Invalid YouTube video ID: {youtube_live_url_or_id}")
+
+        remote_youtube_video_id = youtube_live_url_or_id
+
+    res = requests.get(
+        "https://www.googleapis.com/youtube/v3/videos",
+        params={
+            "key": youtube_api_key,
+            "part": "id,snippet,liveStreamingDetails",
+            "id": remote_youtube_video_id,
+        },
+    )
+    res.raise_for_status()
+    ytlive_api_video_response = YoutubeApiVideoResponse.model_validate(res.json())
+    return ytlive_api_video_response
+
+
 def launch_add_youtube_live(
     args: LaunchAddYouTubeLiveArgument,
     logger: Logger,
 ) -> None:
-    logger.info("!!!")
+    youtube_api_key = args.youtube_api_key
+
     initial_data = fetch_initial_data()
 
     with gr.Blocks() as demo:
@@ -160,7 +227,7 @@ def launch_add_youtube_live(
                         interactive=False,
                     )
                 with gr.Row():
-                    youtube_live_id_text_field = gr.Textbox(
+                    youtube_live_title_text_field = gr.Textbox(
                         label="タイトル",
                         interactive=False,
                     )
@@ -171,6 +238,11 @@ def launch_add_youtube_live(
                     )
                     youtube_channel_id_text_field = gr.Textbox(
                         label="データベース上のチャンネルID",
+                        interactive=False,
+                    )
+                with gr.Row():
+                    youtube_channel_name_text_field = gr.Textbox(
+                        label="チャンネル名",
                         interactive=False,
                     )
                 with gr.Row():
@@ -220,6 +292,11 @@ def launch_add_youtube_live(
                         value="配信アーカイブを追加",
                         variant="primary",
                     )
+                with gr.Row():
+                    added_youtube_live_id_text_field = gr.Textbox(
+                        label="追加された配信アーカイブのデータベース上のID",
+                        interactive=False,
+                    )
 
         def handle_project_changed(
             project_id: str,
@@ -246,17 +323,66 @@ def launch_add_youtube_live(
                 ),
             )
 
-        def handle_fetch_youtube_live_data_button_clicked() -> None:
-            pass
+        def handle_fetch_youtube_live_data_button_clicked(
+            youtube_live_url_or_id: str | None,
+        ) -> Any:
+            if youtube_live_url_or_id is None or len(youtube_live_url_or_id) == 0:
+                raise Exception("Invalid YouTube live URL or ID")
 
-        def handle_add_live_archive_button_clicked() -> None:
+            youtube_api_video_response = fetch_youtube_live_data(
+                youtube_live_url_or_id=youtube_live_url_or_id,
+                youtube_api_key=youtube_api_key,
+            )
+            items = youtube_api_video_response.items
+            if len(items) == 0:
+                raise Exception("Invalid YouTube API response")
+
+            item = items[0]
+
+            youtube_live_title = ""
+            remote_youtube_channel_id = ""
+            youtube_channel_title = ""
+            if item.snippet is not None:
+                youtube_live_title = item.snippet.title
+                remote_youtube_channel_id = item.snippet.channelId
+                youtube_channel_title = item.snippet.channelTitle
+
+            youtube_live_start_time = ""
+            youtube_live_end_time = ""
+            if item.liveStreamingDetails is not None:
+                if item.liveStreamingDetails.actualStartTime is not None:
+                    youtube_live_start_time = (
+                        item.liveStreamingDetails.actualStartTime.astimezone(
+                            JST
+                        ).isoformat()
+                    )
+
+                if item.liveStreamingDetails.actualEndTime is not None:
+                    youtube_live_end_time = (
+                        item.liveStreamingDetails.actualEndTime.astimezone(
+                            JST
+                        ).isoformat()
+                    )
+
+            return [
+                "YouTube",
+                item.id,
+                youtube_live_title,
+                remote_youtube_channel_id,
+                "",
+                youtube_channel_title,
+                youtube_live_start_time,
+                youtube_live_end_time,
+            ]
+
+        def handle_add_live_archive_button_clicked() -> Any:
             pass
 
         clear_youtube_live_field_button.add(
             components=[
                 youtube_live_url_or_id_text_field,
                 source_text_field,
-                youtube_live_id_text_field,
+                youtube_live_title_text_field,
                 youtube_live_id_text_field,
                 remote_youtube_channel_id_text_field,
                 youtube_channel_id_text_field,
@@ -274,6 +400,17 @@ def launch_add_youtube_live(
 
         fetch_youtube_live_data_button.click(
             fn=handle_fetch_youtube_live_data_button_clicked,
+            inputs=[youtube_live_url_or_id_text_field],
+            outputs=[
+                source_text_field,
+                youtube_live_id_text_field,
+                youtube_live_title_text_field,
+                remote_youtube_channel_id_text_field,
+                youtube_channel_id_text_field,
+                youtube_channel_name_text_field,
+                start_time_text_field,
+                end_time_text_field,
+            ],
         )
 
         add_live_archive_button.click(
