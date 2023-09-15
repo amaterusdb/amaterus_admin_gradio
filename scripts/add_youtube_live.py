@@ -137,6 +137,7 @@ def launch_add_youtube_live(
         with gr.Row():
             program_drop = gr.Dropdown(
                 label="Program",
+                interactive=True,
             )
 
         def project_changed(
@@ -163,7 +164,9 @@ def launch_add_youtube_live(
                 ),
             )
 
-        project_drop.select(project_changed, inputs=project_drop, outputs=program_drop)
+        project_drop.select(
+            fn=project_changed, inputs=project_drop, outputs=program_drop
+        )
 
     demo.launch()
 
