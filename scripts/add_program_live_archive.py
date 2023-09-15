@@ -1,7 +1,7 @@
 import logging
 import os
 from argparse import ArgumentParser
-from logging import Logger, getLogger
+from logging import Logger
 from pathlib import Path
 from typing import Any
 
@@ -28,9 +28,11 @@ class InitialDataResponseProject(BaseModel):
     id: str
     name: str
 
+
 class InitialDataResponsePerson(BaseModel):
     id: str
     name: str
+
 
 class InitialDataResponseData(BaseModel):
     project_list: list[InitialDataResponseProject]
@@ -213,8 +215,13 @@ def launch_add_youtube_live(
                             ),
                         ),
                     )
+                with gr.Row():
+                    add_live_archive_button = gr.Button(
+                        value="配信アーカイブを追加",
+                        variant="primary",
+                    )
 
-        def project_changed(
+        def handle_project_changed(
             project_id: str,
         ) -> Any:
             if project_id is None or len(project_id) == 0:
@@ -239,6 +246,12 @@ def launch_add_youtube_live(
                 ),
             )
 
+        def handle_fetch_youtube_live_data_button_clicked() -> None:
+            pass
+
+        def handle_add_live_archive_button_clicked() -> None:
+            pass
+
         clear_youtube_live_field_button.add(
             components=[
                 youtube_live_url_or_id_text_field,
@@ -259,8 +272,18 @@ def launch_add_youtube_live(
             ],
         )
 
+        fetch_youtube_live_data_button.click(
+            fn=handle_fetch_youtube_live_data_button_clicked,
+        )
+
+        add_live_archive_button.click(
+            fn=handle_add_live_archive_button_clicked,
+        )
+
         project_drop.select(
-            fn=project_changed, inputs=project_drop, outputs=program_drop
+            fn=handle_project_changed,
+            inputs=project_drop,
+            outputs=program_drop,
         )
 
     demo.launch()
