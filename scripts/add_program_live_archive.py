@@ -462,7 +462,6 @@ def launch_add_youtube_live(
                 youtube_channel_title,
                 youtube_live_start_time,
                 youtube_live_end_time,
-                hasura_admin_secret,
             ]
 
         def handle_add_live_archive_button_clicked(
