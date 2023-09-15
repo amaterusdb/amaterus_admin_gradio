@@ -161,7 +161,7 @@ def fetch_niconico_video_data(
     remote_niconico_content_id: str | None = None
     if niconico_video_url_or_id.startswith("https://"):
         urlp = urlparse(niconico_video_url_or_id)
-        if urlp.netloc != "www.nicovideo.com":
+        if urlp.netloc != "www.nicovideo.jp":
             raise Exception(f"Invalid URL: {niconico_video_url_or_id}")
 
         remote_niconico_content_id = os.path.basename(urlp.path)
