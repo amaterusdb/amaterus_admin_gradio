@@ -25,6 +25,7 @@ readme = "README.md"
 python = "~3.11"
 gradio = "^3.44.3"
 requests = "^2.31.0"
+pydantic = "^2.3.0"
 
 
 [tool.poetry.group.dev.dependencies]
