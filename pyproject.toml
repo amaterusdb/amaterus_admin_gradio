@@ -23,6 +23,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "~3.11"
+gradio = "^3.44.3"
 
 
 [tool.poetry.group.dev.dependencies]
