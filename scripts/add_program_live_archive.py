@@ -484,6 +484,7 @@ def launch_add_youtube_live(
                 title=youtube_live_title,
                 remote_youtube_channel_id=remote_youtube_channel_id,
                 youtube_channel_name=youtube_channel_name,
+                hasura_admin_secret=hasura_admin_secret,
             )
 
             return [
