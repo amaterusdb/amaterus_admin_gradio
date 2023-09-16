@@ -207,8 +207,8 @@ class AddProgramLiveArchiveResponse(BaseModel):
 def add_program_live_archive(
     program_id: str,
     person_id: str,
-    start_time: datetime,
-    end_time: datetime,
+    start_time: datetime | None,
+    end_time: datetime | None,
     remote_youtube_video_id: str,
     title: str,
     remote_youtube_channel_id: str,
@@ -225,8 +225,8 @@ def add_program_live_archive(
 mutation A(
   $programId: uuid!
   $personId: uuid!
-  $startTime: timestamptz!
-  $endTime: timestamptz!
+  $startTime: timestamptz
+  $endTime: timestamptz
   $remoteYoutubeVideoId: String!
   $title: String!
   $remoteYoutubeChannelId: String!
@@ -275,8 +275,8 @@ mutation A(
             "variables": {
                 "programId": program_id,
                 "personId": person_id,
-                "startTime": start_time.isoformat(),
-                "endTime": end_time.isoformat(),
+                "startTime": start_time.isoformat() if start_time is not None else None,
+                "endTime": end_time.isoformat() if end_time is not None else None,
                 "remoteYoutubeVideoId": remote_youtube_video_id,
                 "title": title,
                 "remoteYoutubeChannelId": remote_youtube_channel_id,
@@ -474,11 +474,22 @@ def launch_add_youtube_live(
             program_id: str,
             person_id: str,
         ) -> Any:
+            start_time = (
+                datetime.fromisoformat(start_time_string)
+                if len(start_time_string) != 0
+                else None
+            )
+            end_time = (
+                datetime.fromisoformat(end_time_string)
+                if len(end_time_string) != 0
+                else None
+            )
+
             program_live_archive = add_program_live_archive(
                 program_id=program_id,
                 person_id=person_id,
-                start_time=datetime.fromisoformat(start_time_string),
-                end_time=datetime.fromisoformat(end_time_string),
+                start_time=start_time,
+                end_time=end_time,
                 remote_youtube_video_id=remote_youtube_video_id,
                 title=youtube_live_title,
                 remote_youtube_channel_id=remote_youtube_channel_id,
