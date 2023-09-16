@@ -296,7 +296,7 @@ def create_add_program_live_archive_tab(
                     )
                 with gr.Row():
                     fetch_youtube_live_data_button = gr.Button(
-                        value="データベース または YouTube から配信情報を取得",
+                        value="YouTube から配信情報を取得",
                     )
                 with gr.Row():
                     remote_youtube_video_id_text_field = gr.Textbox(

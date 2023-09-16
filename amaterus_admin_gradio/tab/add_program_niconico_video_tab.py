@@ -326,7 +326,7 @@ def create_add_program_niconico_video_tab(
                     )
                 with gr.Row():
                     fetch_niconico_video_data_button = gr.Button(
-                        value="データベース または ニコニコ動画 から動画情報を取得",
+                        value="ニコニコ動画 から動画情報を取得",
                     )
                 with gr.Row():
                     remote_niconico_content_id_text_field = gr.Textbox(
