@@ -1,8 +1,7 @@
 # amaterus_admin_gradio
 
 ```shell
-poetry run python scripts/add_program_live_archive.py --env_file .env
-poetry run python scripts/add_program_niconico_video.py --env_file .env
+poetry run python scripts/main.py --env_file .env
 ```
 
 ```shell
