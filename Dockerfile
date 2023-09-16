@@ -33,4 +33,4 @@ ADD ./amaterus_admin_gradio /code/amaterus_admin_gradio
 
 ENV GRADIO_SERVER_NAME=0.0.0.0
 
-CMD [ "gosu", "user", "python", "/code/add_youtube_live.py" ]
+CMD [ "gosu", "user", "python", "/code/main.py" ]

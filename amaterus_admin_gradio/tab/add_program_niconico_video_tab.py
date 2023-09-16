@@ -1,8 +1,6 @@
 import json
-import logging
 import os
 import re
-from argparse import ArgumentParser
 from datetime import datetime
 from logging import Logger
 from pathlib import Path
@@ -12,9 +10,7 @@ from zoneinfo import ZoneInfo
 
 import gradio as gr
 import requests
-from amaterus_admin_gradio.utility.logging_utility import setup_logger
 from bs4 import BeautifulSoup
-from dotenv import load_dotenv
 from pydantic import BaseModel
 
 JST = ZoneInfo("Asia/Tokyo")
@@ -309,15 +305,13 @@ mutation A(
     return add_program_niconico_video_response.data.program_niconico_video
 
 
-def launch_add_program_niconico_video(
-    args: LaunchAddProgramNiconicoVideoArgument,
+def create_add_program_niconico_video_tab(
+    hasura_admin_secret: str,
     logger: Logger,
-) -> None:
-    hasura_admin_secret = args.hasura_admin_secret
-
+) -> gr.Tab:
     initial_data = fetch_initial_data()
 
-    with gr.Blocks() as demo:
+    with gr.Tab(label="プログラムにニコニコ動画の動画を追加") as tab:
         gr.Markdown("# プログラムにニコニコ動画の動画を追加")
         with gr.Row():
             with gr.Column():
@@ -535,84 +529,4 @@ def launch_add_program_niconico_video(
             outputs=program_drop,
         )
 
-    demo.launch()
-
-
-def load_app_config_from_env() -> AppConfig:
-    hasura_admin_secret = os.environ.get("AMATERUS_ADMIN_GRADIO_HASURA_ADMIN_SECRET")
-    if hasura_admin_secret is not None and len(hasura_admin_secret) == 0:
-        hasura_admin_secret = None
-
-    log_level_string = os.environ.get("AMATERUS_ADMIN_GRADIO_LOG_LEVEL")
-    log_level = logging.INFO
-    if log_level_string is not None and len(log_level_string) > 0:
-        log_level = int(log_level_string)
-
-    log_file_string = os.environ.get("AMATERUS_ADMIN_GRADIO_LOG_FILE")
-    log_file: Path | None = None
-    if log_file_string is not None and len(log_file_string) > 0:
-        log_file = Path(log_file_string)
-
-    return AppConfig(
-        hasura_admin_secret=hasura_admin_secret,
-        log_level=log_level,
-        log_file=log_file,
-    )
-
-
-def main() -> None:
-    parser = ArgumentParser()
-    parser.add_argument(
-        "--env_file",
-        type=Path,
-    )
-    pre_args, _ = parser.parse_known_args()
-
-    env_file: Path | None = pre_args.env_file
-    if env_file is not None:
-        load_dotenv(env_file)
-
-    app_config = load_app_config_from_env()
-    parser.add_argument(
-        "--log_level",
-        type=int,
-        default=app_config.log_level,
-    )
-    parser.add_argument(
-        "--log_file",
-        type=Path,
-        default=app_config.log_file,
-    )
-    parser.add_argument(
-        "--hasura_admin_secret",
-        type=str,
-        default=app_config.hasura_admin_secret,
-        required=app_config.hasura_admin_secret is None,
-    )
-    args = parser.parse_args()
-
-    log_level: int = args.log_level
-    log_file: Path | None = args.log_file
-    hasura_admin_secret: str = args.hasura_admin_secret
-
-    logging.basicConfig(
-        level=log_level,
-    )
-
-    logger = Logger(__file__)
-    setup_logger(
-        logger=logger,
-        log_level=log_level,
-        log_file=log_file,
-    )
-
-    launch_add_program_niconico_video(
-        args=LaunchAddProgramNiconicoVideoArgument(
-            hasura_admin_secret=hasura_admin_secret,
-        ),
-        logger=logger,
-    )
-
-
-if __name__ == "__main__":
-    main()
+    return tab

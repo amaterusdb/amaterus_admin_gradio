@@ -5,7 +5,10 @@ from logging import Logger
 from pathlib import Path
 
 import gradio as gr
-from amaterus_admin_gradio.tab import create_add_program_live_archive_tab
+from amaterus_admin_gradio.tab import (
+    create_add_program_live_archive_tab,
+    create_add_program_niconico_video_tab,
+)
 from amaterus_admin_gradio.utility.logging_utility import setup_logger
 from dotenv import load_dotenv
 from pydantic import BaseModel
@@ -26,17 +29,20 @@ class AppConfig(BaseModel):
 def launch_gradio(
     args: LaunchGradioArgument,
     logger: Logger,
-):
+) -> None:
     hasura_admin_secret = args.hasura_admin_secret
     youtube_api_key = args.youtube_api_key
 
     with gr.Blocks() as demo:
-        tab = create_add_program_live_archive_tab(
+        create_add_program_live_archive_tab(
             hasura_admin_secret=hasura_admin_secret,
             youtube_api_key=youtube_api_key,
             logger=logger,
         )
-        tab.select()
+        create_add_program_niconico_video_tab(
+            hasura_admin_secret=hasura_admin_secret,
+            logger=logger,
+        )
 
     demo.launch()
 
