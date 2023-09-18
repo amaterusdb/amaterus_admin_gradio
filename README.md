@@ -10,6 +10,11 @@ sudo docker run --rm --env-file $PWD/.env -p "127.0.0.1:7860:7860" amaterus_admi
 ```
 
 ```shell
+sudo docker build -t docker.aoirint.com/aoirint/amaterus_admin_gradio .
+sudo docker push docker.aoirint.com/aoirint/amaterus_admin_gradio
+```
+
+```shell
 poetry export --without-hashes -o requirements.txt
 poetry export --without-hashes --with dev -o requirements-dev.txt
 ```
