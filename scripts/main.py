@@ -17,6 +17,8 @@ from pydantic import BaseModel
 class LaunchGradioArgument(BaseModel):
     youtube_api_key: str
     hasura_admin_secret: str
+    basic_auth_username: str | None
+    basic_auth_password: str | None
 
 
 class AppConfig(BaseModel):
@@ -24,6 +26,8 @@ class AppConfig(BaseModel):
     log_file: Path | None
     youtube_api_key: str | None
     hasura_admin_secret: str | None
+    basic_auth_username: str | None
+    basic_auth_password: str | None
 
 
 def launch_gradio(
@@ -32,6 +36,22 @@ def launch_gradio(
 ) -> None:
     hasura_admin_secret = args.hasura_admin_secret
     youtube_api_key = args.youtube_api_key
+    basic_auth_username = args.basic_auth_username
+    basic_auth_password = args.basic_auth_password
+
+    auth: tuple[str, str] | None = None
+    if basic_auth_username is not None or basic_auth_password is not None:
+        if basic_auth_username is None or basic_auth_password is None:
+            raise Exception(
+                "Basic authentication is enabled but"
+                "one of (basic_auth_username, basic_auth_password) is None. "
+                "Set both values."
+            )
+
+        auth = (
+            basic_auth_username,
+            basic_auth_password,
+        )
 
     with gr.Blocks() as demo:
         create_add_program_live_archive_tab(
@@ -44,7 +64,9 @@ def launch_gradio(
             logger=logger,
         )
 
-    demo.launch()
+    demo.launch(
+        auth=auth,
+    )
 
 
 def load_app_config_from_env() -> AppConfig:
@@ -55,6 +77,14 @@ def load_app_config_from_env() -> AppConfig:
     hasura_admin_secret = os.environ.get("AMATERUS_ADMIN_GRADIO_HASURA_ADMIN_SECRET")
     if hasura_admin_secret is not None and len(hasura_admin_secret) == 0:
         hasura_admin_secret = None
+
+    basic_auth_username = os.environ.get("AMATERUS_ADMIN_GRADIO_BASIC_AUTH_USERNAME")
+    if basic_auth_username is not None and len(basic_auth_username) == 0:
+        basic_auth_username = None
+
+    basic_auth_password = os.environ.get("AMATERUS_ADMIN_GRADIO_BASIC_AUTH_PASSWORD")
+    if basic_auth_password is not None and len(basic_auth_password) == 0:
+        basic_auth_password = None
 
     log_level_string = os.environ.get("AMATERUS_ADMIN_GRADIO_LOG_LEVEL")
     log_level = logging.INFO
@@ -69,6 +99,8 @@ def load_app_config_from_env() -> AppConfig:
     return AppConfig(
         youtube_api_key=youtube_api_key,
         hasura_admin_secret=hasura_admin_secret,
+        basic_auth_username=basic_auth_username,
+        basic_auth_password=basic_auth_password,
         log_level=log_level,
         log_file=log_file,
     )
@@ -109,12 +141,25 @@ def main() -> None:
         default=app_config.hasura_admin_secret,
         required=app_config.hasura_admin_secret is None,
     )
+    parser.add_argument(
+        "--basic_auth_username",
+        type=str,
+        default=app_config.basic_auth_username,
+    )
+    parser.add_argument(
+        "--basic_auth_password",
+        type=str,
+        default=app_config.basic_auth_password,
+    )
+
     args = parser.parse_args()
 
     log_level: int = args.log_level
     log_file: Path | None = args.log_file
     youtube_api_key: str = args.youtube_api_key
     hasura_admin_secret: str = args.hasura_admin_secret
+    basic_auth_username: str | None = args.basic_auth_username
+    basic_auth_password: str | None = args.basic_auth_password
 
     logging.basicConfig(
         level=log_level,
@@ -131,6 +176,8 @@ def main() -> None:
         args=LaunchGradioArgument(
             youtube_api_key=youtube_api_key,
             hasura_admin_secret=hasura_admin_secret,
+            basic_auth_username=basic_auth_username,
+            basic_auth_password=basic_auth_password,
         ),
         logger=logger,
     )
