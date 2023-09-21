@@ -54,7 +54,9 @@ def launch_gradio(
             basic_auth_password,
         )
 
-    with gr.Blocks() as demo:
+    with gr.Blocks(
+        title="Amaterus Admin Gradio",
+    ) as demo:
         create_add_program_live_archive_tab(
             hasura_admin_secret=hasura_admin_secret,
             youtube_api_key=youtube_api_key,
