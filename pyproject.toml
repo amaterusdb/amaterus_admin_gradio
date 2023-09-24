@@ -18,7 +18,7 @@ mypy_ignore_packages = ["amaterus_admin_gradio.graphql_client.*"]
   excludes = ["amaterus_admin_gradio/graphql_client/"]
 
 [tool.ariadne-codegen]
-queries_path = "amaterus_admin_gradio/"
+queries_path = "queries/"
 schema_path  = "schema.graphql"
 target_package_path = "amaterus_admin_gradio/"
 async_client = false

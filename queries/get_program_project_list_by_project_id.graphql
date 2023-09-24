@@ -1,0 +1,20 @@
+query GetProgramProjectListByProjectId(
+    $projectId: uuid!
+) {
+    project: projects_by_pk(
+        id: $projectId
+    ) {
+        program_project_list: program_projects(
+            order_by: {
+                program: {
+                    start_time: desc
+                }
+            }
+        ) {
+            program {
+                id
+                title
+            }
+        }
+    }
+}
