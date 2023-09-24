@@ -59,6 +59,10 @@ def launch_gradio(
     with gr.Blocks(
         title="Amaterus Admin Gradio",
     ) as demo:
+        create_add_program_tab(
+            hasura_admin_secret=hasura_admin_secret,
+            logger=logger,
+        )
         create_add_program_live_archive_tab(
             hasura_admin_secret=hasura_admin_secret,
             youtube_api_key=youtube_api_key,
@@ -74,10 +78,6 @@ def launch_gradio(
             logger=logger,
         )
         create_add_program_twitter_announcement_tab(
-            hasura_admin_secret=hasura_admin_secret,
-            logger=logger,
-        )
-        create_add_program_tab(
             hasura_admin_secret=hasura_admin_secret,
             logger=logger,
         )
