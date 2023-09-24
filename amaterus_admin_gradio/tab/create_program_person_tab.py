@@ -42,6 +42,12 @@ def create_create_program_person_tab(
             person_drop = gr.Dropdown(
                 label="参加者",
                 interactive=True,
+                choices=list(
+                    map(
+                        lambda person: (person.name, person.id),
+                        initial_data.person_list,
+                    ),
+                ),
             )
         with gr.Row():
             is_absent_radio = gr.Radio(
