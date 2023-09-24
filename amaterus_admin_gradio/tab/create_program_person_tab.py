@@ -64,6 +64,34 @@ def create_create_program_person_tab(
                 interactive=False,
             )
 
+        def handle_project_changed(
+            project_id: str,
+        ) -> Any:
+            if project_id is None or len(project_id) == 0:
+                return gr.Dropdown.update(
+                    value=None,
+                    choices=None,
+                )
+
+            response = graphql_client.get_program_project_list_by_project_id(
+                project_id=project_id,
+            )
+            project = response.project
+            if project is None:
+                raise Exception("Project must not be None")
+
+            return gr.Dropdown.update(
+                choices=list(
+                    map(
+                        lambda program_project: (
+                            program_project.program.title,
+                            program_project.program.id,
+                        ),
+                        project.program_project_list,
+                    ),
+                ),
+            )
+
         def handle_add_proram_person_button_clicked(
             program_id: str,
             person_id: str,
@@ -89,6 +117,12 @@ def create_create_program_person_tab(
             return [
                 program_person.id,
             ]
+
+        project_drop.select(
+            fn=handle_project_changed,
+            inputs=project_drop,
+            outputs=program_drop,
+        )
 
         clear_field_button.add(
             components=[
