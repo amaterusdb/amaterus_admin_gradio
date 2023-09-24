@@ -17,52 +17,52 @@ def create_create_program_person_tab(
 
     with gr.Tab(label="プログラムの参加者を追加") as tab:
         gr.Markdown("# プログラムの参加者を追加")
+
         with gr.Row():
-            with gr.Row():
-                clear_field_button = gr.ClearButton(
-                    value="以下のフィールドをクリア",
-                )
-            with gr.Row():
-                project_drop = gr.Dropdown(
-                    label="プロジェクト",
-                    interactive=True,
-                    choices=list(
-                        map(
-                            lambda project: (project.name, project.id),
-                            initial_data.project_list,
-                        ),
+            clear_field_button = gr.ClearButton(
+                value="以下のフィールドをクリア",
+            )
+        with gr.Row():
+            project_drop = gr.Dropdown(
+                label="プロジェクト",
+                interactive=True,
+                choices=list(
+                    map(
+                        lambda project: (project.name, project.id),
+                        initial_data.project_list,
                     ),
-                )
-            with gr.Row():
-                program_drop = gr.Dropdown(
-                    label="プログラム",
-                    interactive=True,
-                )
-            with gr.Row():
-                person_drop = gr.Dropdown(
-                    label="参加者",
-                    interactive=True,
-                )
-            with gr.Row():
-                is_absent_radio = gr.Radio(
-                    label="欠席?",
-                    interactive=True,
-                    choices=[
-                        ("データなし", 0),
-                        ("出席", 1),
-                        ("欠席", 2),
-                    ],
-                )
-            with gr.Row():
-                add_program_person_button = gr.Button(
-                    value="プログラム参加者を追加",
-                    variant="primary",
-                )
-            with gr.Row():
-                added_program_person_id_text_field = gr.Textbox(
-                    label="追加されたプログラム参加者のデータベース上のID",
-                    interactive=False,
-                )
+                ),
+            )
+        with gr.Row():
+            program_drop = gr.Dropdown(
+                label="プログラム",
+                interactive=True,
+            )
+        with gr.Row():
+            person_drop = gr.Dropdown(
+                label="参加者",
+                interactive=True,
+            )
+        with gr.Row():
+            is_absent_radio = gr.Radio(
+                label="欠席?",
+                interactive=True,
+                choices=[
+                    ("データなし", 0),
+                    ("出席", 1),
+                    ("欠席", 2),
+                ],
+            )
+        with gr.Row():
+            add_program_person_button = gr.Button(
+                value="プログラム参加者を追加",
+                variant="primary",
+            )
+        with gr.Row():
+            added_program_person_id_text_field = gr.Textbox(
+                label="追加されたプログラム参加者のデータベース上のID",
+                interactive=False,
+            )
 
         def handle_add_proram_person_button_clicked(
             program_id: str,
