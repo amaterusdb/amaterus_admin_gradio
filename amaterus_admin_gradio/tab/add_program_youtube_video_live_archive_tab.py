@@ -238,7 +238,7 @@ mutation A(
                     }
                 }
                 on_conflict: {
-                    constraint: youtube_lives_remote_youtube_video_id_key
+                    constraint: youtube_videos_remote_youtube_video_id_key
                     update_columns: [
                         title
                         post_time
