@@ -22,6 +22,7 @@ poetry export --without-hashes --with dev -o requirements-dev.txt
 ## GraphQL Code Generation
 
 - Node 20
+- [graphqurl](https://github.com/hasura/graphqurl) 1.0
 
 ```shell
 npm install -g graphqurl
@@ -29,4 +30,8 @@ npm install -g graphqurl
 
 ```shell
 gq "https://amaterus-hasura.aoirint.com/v1/graphql" --introspect > schema.graphql
+```
+
+```shell
+poetry run ariadne-codegen
 ```
