@@ -18,3 +18,20 @@ sudo docker push docker.aoirint.com/aoirint/amaterus_admin_gradio
 poetry export --without-hashes -o requirements.txt
 poetry export --without-hashes --with dev -o requirements-dev.txt
 ```
+
+## GraphQL Code Generation
+
+- Node 20
+- [graphqurl](https://github.com/hasura/graphqurl) 1.0
+
+```shell
+npm install -g graphqurl
+```
+
+```shell
+poetry run python dev_scripts/fetch_hasura_graphql_schema.py
+```
+
+```shell
+poetry run ariadne-codegen
+```

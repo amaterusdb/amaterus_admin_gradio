@@ -9,10 +9,19 @@ enable_mypy = true
 mypy_preset = "strict"
 line_length = 88
 py_version = "py311"
+mypy_ignore_packages = ["amaterus_admin_gradio.graphql_client.*"]
 
   [[tool.pysen.lint.mypy_targets]]
     paths = ["."]
 
+[tool.pysen.lint.source]
+  excludes = ["amaterus_admin_gradio/graphql_client/"]
+
+[tool.ariadne-codegen]
+queries_path = "queries/"
+schema_path  = "schema.graphql"
+target_package_path = "amaterus_admin_gradio/"
+async_client = false
 
 [tool.poetry]
 name = "amaterus-admin-gradio"
@@ -29,6 +38,7 @@ pydantic = "^2.3.0"
 python-dotenv = "^1.0.0"
 beautifulsoup4 = "^4.12.2"
 html5lib = "^1.1"
+ariadne-codegen = {extras = ["subscriptions"], version = "^0.9.0"}
 
 
 [tool.poetry.group.dev.dependencies]

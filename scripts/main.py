@@ -5,6 +5,7 @@ from logging import Logger
 from pathlib import Path
 
 import gradio as gr
+from amaterus_admin_gradio.graphql_client.client import Client
 from amaterus_admin_gradio.tab import (
     create_add_program_live_archive_tab,
     create_add_program_niconico_video_tab,
@@ -59,6 +60,13 @@ def launch_gradio(
             basic_auth_password,
         )
 
+    graphql_client = Client(
+        url=hasura_endpoint,
+        headers={
+            "X-Hasura-Admin-Secret": hasura_admin_secret,
+        },
+    )
+
     with gr.Blocks(
         title="Amaterus Admin Gradio",
     ) as demo:
@@ -73,6 +81,7 @@ def launch_gradio(
             logger=logger,
         )
         create_add_program_live_archive_tab(
+            graphql_client=graphql_client,
             hasura_endpoint=hasura_endpoint,
             hasura_admin_secret=hasura_admin_secret,
             youtube_api_key=youtube_api_key,

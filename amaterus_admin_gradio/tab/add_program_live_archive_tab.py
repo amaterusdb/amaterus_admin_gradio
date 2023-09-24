@@ -8,6 +8,8 @@ import gradio as gr
 import requests
 from pydantic import BaseModel
 
+from ..graphql_client.client import Client
+
 JST = ZoneInfo("Asia/Tokyo")
 
 
@@ -54,66 +56,6 @@ query {
     res.raise_for_status()
     initial_data_response = InitialDataResponse.model_validate(res.json())
     return initial_data_response.data
-
-
-class ProjectDataResponseProgram(BaseModel):
-    id: str
-    title: str
-
-
-class ProjectDataResponseProgramProject(BaseModel):
-    program: ProjectDataResponseProgram
-
-
-class ProjectDataResponseProject(BaseModel):
-    program_project_list: list[ProjectDataResponseProgramProject]
-
-
-class ProjectDataResponseData(BaseModel):
-    project: ProjectDataResponseProject
-
-
-class ProjectDataResponse(BaseModel):
-    data: ProjectDataResponseData
-
-
-def fetch_project_data(
-    project_id: str,
-    hasura_endpoint: str,
-) -> ProjectDataResponseProject:
-    res = requests.post(
-        hasura_endpoint,
-        json={
-            "query": """
-query A(
-    $projectId: uuid!
-) {
-    project: projects_by_pk(
-        id: $projectId
-    ) {
-        program_project_list: program_projects(
-            order_by: {
-                program: {
-                    start_time: desc
-                }
-            }
-        ) {
-            program {
-                id
-                title
-            }
-        }
-    }
-}
-""",
-            "variables": {
-                "projectId": project_id,
-            },
-        },
-    )
-    res.raise_for_status()
-    project_data_response = ProjectDataResponse.model_validate(res.json())
-    return project_data_response.data.project
 
 
 class YoutubeApiVideoResponseItemSnippet(BaseModel):
@@ -279,9 +221,10 @@ mutation A(
 
 
 def create_add_program_live_archive_tab(
-    youtube_api_key: str,
+    graphql_client: Client,
     hasura_endpoint: str,
     hasura_admin_secret: str,
+    youtube_api_key: str,
     logger: Logger,
 ) -> gr.Tab:
     initial_data = fetch_initial_data(
@@ -385,10 +328,14 @@ def create_add_program_live_archive_tab(
                     choices=None,
                 )
 
-            project = fetch_project_data(
+            project = graphql_client.get_program_project_list_by_project_id(
                 project_id=project_id,
-                hasura_endpoint=hasura_endpoint,
-            )
+            ).project
+            if project is None:
+                return gr.Dropdown.update(
+                    value=None,
+                    choices=None,
+                )
 
             return gr.Dropdown.update(
                 choices=list(
