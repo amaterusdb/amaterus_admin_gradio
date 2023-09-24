@@ -14,6 +14,11 @@ py_version = "py311"
     paths = ["."]
 
 
+[tool.ariadne-codegen]
+queries_path = "amaterus_admin_gradio/"
+schema_path  = "schema.graphql"
+target_package_path = "amaterus_admin_gradio/"
+
 [tool.poetry]
 name = "amaterus-admin-gradio"
 version = "0.1.0"
