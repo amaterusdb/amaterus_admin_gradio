@@ -71,8 +71,7 @@ def launch_gradio(
         title="Amaterus Admin Gradio",
     ) as demo:
         create_add_program_tab(
-            hasura_endpoint=hasura_endpoint,
-            hasura_admin_secret=hasura_admin_secret,
+            graphql_client=graphql_client,
             logger=logger,
         )
         create_add_program_twitter_announcement_tab(

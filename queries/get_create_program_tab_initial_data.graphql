@@ -1,0 +1,10 @@
+query GetCreateProgramInitialData {
+    project_list: projects {
+        id
+        name
+    }
+    game_list: games {
+        id
+        name
+    }
+}
