@@ -454,21 +454,9 @@ def create_add_program_youtube_video_live_archive_tab(
             program_id: str,
             person_id: str,
         ) -> Any:
-            post_time = (
-                datetime.fromisoformat(post_time_string)
-                if len(post_time_string) != 0
-                else None
-            )
-            start_time = (
-                datetime.fromisoformat(start_time_string)
-                if len(start_time_string) != 0
-                else None
-            )
-            end_time = (
-                datetime.fromisoformat(end_time_string)
-                if len(end_time_string) != 0
-                else None
-            )
+            post_time = datetime.fromisoformat(post_time_string)
+            start_time = datetime.fromisoformat(start_time_string)
+            end_time = datetime.fromisoformat(end_time_string)
 
             program_live_archive = add_program_youtube_video_live_archive(
                 program_id=program_id,
