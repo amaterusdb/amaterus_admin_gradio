@@ -18,6 +18,7 @@ py_version = "py311"
 queries_path = "amaterus_admin_gradio/"
 schema_path  = "schema.graphql"
 target_package_path = "amaterus_admin_gradio/"
+async_client = false
 
 [tool.poetry]
 name = "amaterus-admin-gradio"
