@@ -1,4 +1,3 @@
-import json
 import os
 import re
 from datetime import datetime
@@ -9,7 +8,6 @@ from zoneinfo import ZoneInfo
 
 import gradio as gr
 import requests
-from bs4 import BeautifulSoup
 from pydantic import BaseModel
 
 JST = ZoneInfo("Asia/Tokyo")
@@ -370,7 +368,8 @@ def create_add_program_twitter_announcement_tab(
                         choices=list(
                             map(
                                 lambda twitter_account: (
-                                    f"{twitter_account.name} (@{twitter_account.twitter_screen_name})",
+                                    f"{twitter_account.name} "
+                                    f"(@{twitter_account.twitter_screen_name})",
                                     twitter_account.id,
                                 ),
                                 initial_data.twitter_account_list,
