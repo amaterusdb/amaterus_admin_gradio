@@ -1,0 +1,61 @@
+
+mutation CreateProgramNiconicoVideo(
+  $projectId: uuid!
+  $programId: uuid!
+  $personId: uuid!
+  $remoteNiconicoContentId: String!
+  $title: String!
+  $startTime: timestamptz!
+  $thumbnailUrl: String!
+  $remoteNiconicoAccountId: String!
+  $niconicoAccountName: String!
+) {
+    program_niconico_video: insert_program_niconico_videos_one(
+        object: {
+            program_id: $programId
+            person_id: $personId
+            niconico_video: {
+                data: {
+                    remote_niconico_content_id: $remoteNiconicoContentId
+                    title: $title
+                    start_time: $startTime
+                    thumbnail_url: $thumbnailUrl
+                    niconico_account: {
+                        data: {
+                            remote_niconico_account_id: $remoteNiconicoAccountId
+                            name: $niconicoAccountName
+                        }
+                        on_conflict: {
+                            constraint: niconico_accounts_remote_niconico_account_id_key
+                            update_columns: [
+                                name
+                            ]
+                        }
+                    }
+                    project_niconico_videos: {
+                        data: {
+                            project_id: $projectId
+                        }
+                        on_conflict: {
+                            constraint: project_niconico_videos_project_id_niconico_video_id_key
+                            update_columns: [
+                                project_id
+                                niconico_video_id
+                            ]
+                        }
+                    }
+                }
+                on_conflict: {
+                    constraint: niconico_videos_remote_niconico_content_id_key
+                    update_columns: [
+                        title
+                        start_time
+                        thumbnail_url
+                    ]
+                }
+            }
+        }
+    ) {
+        id
+    }
+}

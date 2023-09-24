@@ -13,122 +13,9 @@ import requests
 from bs4 import BeautifulSoup
 from pydantic import BaseModel
 
+from ..graphql_client import Client
+
 JST = ZoneInfo("Asia/Tokyo")
-
-
-class AppConfig(BaseModel):
-    log_level: int
-    log_file: Path | None
-    hasura_admin_secret: str | None
-
-
-class LaunchAddProgramNiconicoVideoArgument(BaseModel):
-    hasura_admin_secret: str
-
-
-class InitialDataResponseProject(BaseModel):
-    id: str
-    name: str
-
-
-class InitialDataResponsePerson(BaseModel):
-    id: str
-    name: str
-
-
-class InitialDataResponseData(BaseModel):
-    project_list: list[InitialDataResponseProject]
-    person_list: list[InitialDataResponsePerson]
-
-
-class InitialDataResponse(BaseModel):
-    data: InitialDataResponseData
-
-
-def fetch_initial_data(
-    hasura_endpoint: str,
-) -> InitialDataResponseData:
-    res = requests.post(
-        hasura_endpoint,
-        json={
-            "query": """
-query {
-    project_list: projects {
-        id
-        name
-    }
-
-    person_list: persons {
-        id
-        name
-    }
-}
-""",
-        },
-    )
-    res.raise_for_status()
-    initial_data_response = InitialDataResponse.model_validate(res.json())
-    return initial_data_response.data
-
-
-class ProjectDataResponseProgram(BaseModel):
-    id: str
-    title: str
-
-
-class ProjectDataResponseProgramProject(BaseModel):
-    program: ProjectDataResponseProgram
-
-
-class ProjectDataResponseProject(BaseModel):
-    program_project_list: list[ProjectDataResponseProgramProject]
-
-
-class ProjectDataResponseData(BaseModel):
-    project: ProjectDataResponseProject
-
-
-class ProjectDataResponse(BaseModel):
-    data: ProjectDataResponseData
-
-
-def fetch_project_data(
-    project_id: str,
-    hasura_endpoint: str,
-) -> ProjectDataResponseProject:
-    res = requests.post(
-        hasura_endpoint,
-        json={
-            "query": """
-query A(
-    $projectId: uuid!
-) {
-    project: projects_by_pk(
-        id: $projectId
-    ) {
-        program_project_list: program_projects(
-            order_by: {
-                program: {
-                    start_time: desc
-                }
-            }
-        ) {
-            program {
-                id
-                title
-            }
-        }
-    }
-}
-""",
-            "variables": {
-                "projectId": project_id,
-            },
-        },
-    )
-    res.raise_for_status()
-    project_data_response = ProjectDataResponse.model_validate(res.json())
-    return project_data_response.data.project
 
 
 class NiconicoVideoApiDataResponseVideoThumbnail(BaseModel):
@@ -195,128 +82,11 @@ def fetch_niconico_video_data(
     return api_data_response
 
 
-class AddProgramNiconicoVideoResponseProgramNiconicoVideo(BaseModel):
-    id: str
-
-
-class AddProgramNiconicoVideoResponseData(BaseModel):
-    program_niconico_video: AddProgramNiconicoVideoResponseProgramNiconicoVideo
-
-
-class AddProgramNiconicoVideoResponse(BaseModel):
-    data: AddProgramNiconicoVideoResponseData
-
-
-def add_program_niconico_video(
-    project_id: str,
-    program_id: str,
-    person_id: str,
-    start_time: datetime,
-    remote_niconico_content_id: str,
-    title: str,
-    thumbnail_url: str,
-    remote_niconico_account_id: str,
-    niconico_account_name: str,
-    hasura_endpoint: str,
-    hasura_admin_secret: str,
-) -> AddProgramNiconicoVideoResponseProgramNiconicoVideo:
-    res = requests.post(
-        hasura_endpoint,
-        headers={
-            "X-Hasura-Admin-Secret": hasura_admin_secret,
-        },
-        json={
-            "query": """
-mutation A(
-  $projectId: uuid!
-  $programId: uuid!
-  $personId: uuid!
-  $remoteNiconicoContentId: String!
-  $title: String!
-  $startTime: timestamptz!
-  $thumbnailUrl: String!
-  $remoteNiconicoAccountId: String!
-  $niconicoAccountName: String!
-) {
-    program_niconico_video: insert_program_niconico_videos_one(
-        object: {
-            program_id: $programId
-            person_id: $personId
-            niconico_video: {
-                data: {
-                    remote_niconico_content_id: $remoteNiconicoContentId
-                    title: $title
-                    start_time: $startTime
-                    thumbnail_url: $thumbnailUrl
-                    niconico_account: {
-                        data: {
-                            remote_niconico_account_id: $remoteNiconicoAccountId
-                            name: $niconicoAccountName
-                        }
-                        on_conflict: {
-                            constraint: niconico_accounts_remote_niconico_account_id_key
-                            update_columns: [
-                                name
-                            ]
-                        }
-                    }
-                    project_niconico_videos: {
-                        data: {
-                            project_id: $projectId
-                        }
-                        on_conflict: {
-                            constraint: project_niconico_videos_project_id_niconico_video_id_key
-                            update_columns: [
-                                project_id
-                                niconico_video_id
-                            ]
-                        }
-                    }
-                }
-                on_conflict: {
-                    constraint: niconico_videos_remote_niconico_content_id_key
-                    update_columns: [
-                        title
-                        start_time
-                        thumbnail_url
-                    ]
-                }
-            }
-        }
-    ) {
-        id
-    }
-}
-""",
-            "variables": {
-                "projectId": project_id,
-                "programId": program_id,
-                "personId": person_id,
-                "remoteNiconicoContentId": remote_niconico_content_id,
-                "title": title,
-                "startTime": start_time.isoformat(),
-                "thumbnailUrl": thumbnail_url,
-                "remoteNiconicoAccountId": remote_niconico_account_id,
-                "niconicoAccountName": niconico_account_name,
-            },
-        },
-    )
-    print(res.json())
-    res.raise_for_status()
-    add_program_niconico_video_response = (
-        AddProgramNiconicoVideoResponse.model_validate(res.json())
-    )
-    return add_program_niconico_video_response.data.program_niconico_video
-
-
 def create_add_program_niconico_video_tab(
-    hasura_endpoint: str,
-    hasura_admin_secret: str,
+    graphql_client: Client,
     logger: Logger,
 ) -> gr.Tab:
-    initial_data = fetch_initial_data(
-        hasura_endpoint=hasura_endpoint,
-    )
+    initial_data = graphql_client.get_create_program_niconico_video_initial_data()
 
     with gr.Tab(label="プログラムにニコニコ動画の動画を追加") as tab:
         gr.Markdown("# プログラムにニコニコ動画の動画を追加")
@@ -415,10 +185,12 @@ def create_add_program_niconico_video_tab(
                     choices=None,
                 )
 
-            project = fetch_project_data(
+            response = graphql_client.get_program_project_list_by_project_id(
                 project_id=project_id,
-                hasura_endpoint=hasura_endpoint,
             )
+            project = response.project
+            if project is None:
+                raise Exception("Project must not be None")
 
             return gr.Dropdown.update(
                 choices=list(
@@ -464,7 +236,7 @@ def create_add_program_niconico_video_tab(
             program_id: str,
             person_id: str,
         ) -> Any:
-            program_niconico_video = add_program_niconico_video(
+            response = graphql_client.create_program_niconico_video(
                 project_id=project_id,
                 program_id=program_id,
                 person_id=person_id,
@@ -474,9 +246,10 @@ def create_add_program_niconico_video_tab(
                 thumbnail_url=thumbnail_url,
                 remote_niconico_account_id=remote_niconico_account_id,
                 niconico_account_name=niconico_account_name,
-                hasura_endpoint=hasura_endpoint,
-                hasura_admin_secret=hasura_admin_secret,
             )
+            program_niconico_video = response.program_niconico_video
+            if program_niconico_video is None:
+                raise Exception("program_niconico_video must not be None")
 
             return [
                 program_niconico_video.id,

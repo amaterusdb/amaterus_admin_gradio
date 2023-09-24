@@ -1,0 +1,11 @@
+query GetCreateProgramNiconicoVideoInitialData {
+    project_list: projects {
+        id
+        name
+    }
+
+    person_list: persons {
+        id
+        name
+    }
+}
