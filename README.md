@@ -29,7 +29,7 @@ npm install -g graphqurl
 ```
 
 ```shell
-gq "https://amaterus-hasura.aoirint.com/v1/graphql" --introspect > schema.graphql
+poetry run python dev_scripts/fetch_hasura_graphql_schema.py
 ```
 
 ```shell
