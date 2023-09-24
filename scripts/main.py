@@ -19,6 +19,7 @@ from pydantic import BaseModel
 
 class LaunchGradioArgument(BaseModel):
     youtube_api_key: str
+    hasura_endpoint: str
     hasura_admin_secret: str
     basic_auth_username: str | None
     basic_auth_password: str | None
@@ -28,6 +29,7 @@ class AppConfig(BaseModel):
     log_level: int
     log_file: Path | None
     youtube_api_key: str | None
+    hasura_endpoint: str | None
     hasura_admin_secret: str | None
     basic_auth_username: str | None
     basic_auth_password: str | None
@@ -37,6 +39,7 @@ def launch_gradio(
     args: LaunchGradioArgument,
     logger: Logger,
 ) -> None:
+    hasura_endpoint = args.hasura_endpoint
     hasura_admin_secret = args.hasura_admin_secret
     youtube_api_key = args.youtube_api_key
     basic_auth_username = args.basic_auth_username
@@ -60,24 +63,29 @@ def launch_gradio(
         title="Amaterus Admin Gradio",
     ) as demo:
         create_add_program_tab(
+            hasura_endpoint=hasura_endpoint,
             hasura_admin_secret=hasura_admin_secret,
             logger=logger,
         )
         create_add_program_twitter_announcement_tab(
+            hasura_endpoint=hasura_endpoint,
             hasura_admin_secret=hasura_admin_secret,
             logger=logger,
         )
         create_add_program_live_archive_tab(
+            hasura_endpoint=hasura_endpoint,
             hasura_admin_secret=hasura_admin_secret,
             youtube_api_key=youtube_api_key,
             logger=logger,
         )
         create_add_program_youtube_video_live_archive_tab(
+            hasura_endpoint=hasura_endpoint,
             hasura_admin_secret=hasura_admin_secret,
             youtube_api_key=youtube_api_key,
             logger=logger,
         )
         create_add_program_niconico_video_tab(
+            hasura_endpoint=hasura_endpoint,
             hasura_admin_secret=hasura_admin_secret,
             logger=logger,
         )
@@ -91,6 +99,10 @@ def load_app_config_from_env() -> AppConfig:
     youtube_api_key = os.environ.get("AMATERUS_ADMIN_GRADIO_YOUTUBE_API_KEY")
     if youtube_api_key is not None and len(youtube_api_key) == 0:
         youtube_api_key = None
+
+    hasura_endpoint = os.environ.get("AMATERUS_ADMIN_GRADIO_HASURA_ENDPOINT")
+    if hasura_endpoint is not None and len(hasura_endpoint) == 0:
+        hasura_endpoint = None
 
     hasura_admin_secret = os.environ.get("AMATERUS_ADMIN_GRADIO_HASURA_ADMIN_SECRET")
     if hasura_admin_secret is not None and len(hasura_admin_secret) == 0:
@@ -116,6 +128,7 @@ def load_app_config_from_env() -> AppConfig:
 
     return AppConfig(
         youtube_api_key=youtube_api_key,
+        hasura_endpoint=hasura_endpoint,
         hasura_admin_secret=hasura_admin_secret,
         basic_auth_username=basic_auth_username,
         basic_auth_password=basic_auth_password,
@@ -154,6 +167,12 @@ def main() -> None:
         required=app_config.youtube_api_key is None,
     )
     parser.add_argument(
+        "--hasura_endpoint",
+        type=str,
+        default=app_config.hasura_endpoint,
+        required=app_config.hasura_endpoint is None,
+    )
+    parser.add_argument(
         "--hasura_admin_secret",
         type=str,
         default=app_config.hasura_admin_secret,
@@ -175,6 +194,7 @@ def main() -> None:
     log_level: int = args.log_level
     log_file: Path | None = args.log_file
     youtube_api_key: str = args.youtube_api_key
+    hasura_endpoint: str = args.hasura_endpoint
     hasura_admin_secret: str = args.hasura_admin_secret
     basic_auth_username: str | None = args.basic_auth_username
     basic_auth_password: str | None = args.basic_auth_password
@@ -193,6 +213,7 @@ def main() -> None:
     launch_gradio(
         args=LaunchGradioArgument(
             youtube_api_key=youtube_api_key,
+            hasura_endpoint=hasura_endpoint,
             hasura_admin_secret=hasura_admin_secret,
             basic_auth_username=basic_auth_username,
             basic_auth_password=basic_auth_password,

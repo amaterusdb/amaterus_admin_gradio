@@ -30,9 +30,11 @@ class InitialDataResponse(BaseModel):
     data: InitialDataResponseData
 
 
-def fetch_initial_data() -> InitialDataResponseData:
+def fetch_initial_data(
+    hasura_endpoint: str,
+) -> InitialDataResponseData:
     res = requests.post(
-        "https://amaterus-hasura.aoirint.com/v1/graphql",
+        hasura_endpoint,
         json={
             "query": """
 query {
@@ -77,9 +79,10 @@ class ProjectDataResponse(BaseModel):
 
 def fetch_project_data(
     project_id: str,
+    hasura_endpoint: str,
 ) -> ProjectDataResponseProject:
     res = requests.post(
-        "https://amaterus-hasura.aoirint.com/v1/graphql",
+        hasura_endpoint,
         json={
             "query": """
 query A(
@@ -191,10 +194,11 @@ def add_program_youtube_video_live_archive(
     is_premiere: bool,
     remote_youtube_channel_id: str,
     youtube_channel_name: str,
+    hasura_endpoint: str,
     hasura_admin_secret: str,
 ) -> AddProgramLiveArchiveResponseProgramLiveArchive:
     res = requests.post(
-        "https://amaterus-hasura.aoirint.com/v1/graphql",
+        hasura_endpoint,
         headers={
             "X-Hasura-Admin-Secret": hasura_admin_secret,
         },
@@ -276,10 +280,13 @@ mutation A(
 
 def create_add_program_youtube_video_live_archive_tab(
     youtube_api_key: str,
+    hasura_endpoint: str,
     hasura_admin_secret: str,
     logger: Logger,
 ) -> gr.Tab:
-    initial_data = fetch_initial_data()
+    initial_data = fetch_initial_data(
+        hasura_endpoint=hasura_endpoint,
+    )
 
     with gr.Tab(label="プログラムに動画として投稿された配信アーカイブを追加") as tab:
         gr.Markdown("# プログラムに動画として投稿された配信アーカイブを追加")
@@ -393,6 +400,7 @@ def create_add_program_youtube_video_live_archive_tab(
 
             project = fetch_project_data(
                 project_id=project_id,
+                hasura_endpoint=hasura_endpoint,
             )
 
             return gr.Dropdown.update(
@@ -470,6 +478,7 @@ def create_add_program_youtube_video_live_archive_tab(
                 is_premiere=is_premiere,
                 remote_youtube_channel_id=remote_youtube_channel_id,
                 youtube_channel_name=youtube_channel_name,
+                hasura_endpoint=hasura_endpoint,
                 hasura_admin_secret=hasura_admin_secret,
             )
 

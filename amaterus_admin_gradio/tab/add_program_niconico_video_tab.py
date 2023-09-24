@@ -45,9 +45,11 @@ class InitialDataResponse(BaseModel):
     data: InitialDataResponseData
 
 
-def fetch_initial_data() -> InitialDataResponseData:
+def fetch_initial_data(
+    hasura_endpoint: str,
+) -> InitialDataResponseData:
     res = requests.post(
-        "https://amaterus-hasura.aoirint.com/v1/graphql",
+        hasura_endpoint,
         json={
             "query": """
 query {
@@ -92,9 +94,10 @@ class ProjectDataResponse(BaseModel):
 
 def fetch_project_data(
     project_id: str,
+    hasura_endpoint: str,
 ) -> ProjectDataResponseProject:
     res = requests.post(
-        "https://amaterus-hasura.aoirint.com/v1/graphql",
+        hasura_endpoint,
         json={
             "query": """
 query A(
@@ -214,10 +217,11 @@ def add_program_niconico_video(
     thumbnail_url: str,
     remote_niconico_account_id: str,
     niconico_account_name: str,
+    hasura_endpoint: str,
     hasura_admin_secret: str,
 ) -> AddProgramNiconicoVideoResponseProgramNiconicoVideo:
     res = requests.post(
-        "https://amaterus-hasura.aoirint.com/v1/graphql",
+        hasura_endpoint,
         headers={
             "X-Hasura-Admin-Secret": hasura_admin_secret,
         },
@@ -306,10 +310,13 @@ mutation A(
 
 
 def create_add_program_niconico_video_tab(
+    hasura_endpoint: str,
     hasura_admin_secret: str,
     logger: Logger,
 ) -> gr.Tab:
-    initial_data = fetch_initial_data()
+    initial_data = fetch_initial_data(
+        hasura_endpoint=hasura_endpoint,
+    )
 
     with gr.Tab(label="プログラムにニコニコ動画の動画を追加") as tab:
         gr.Markdown("# プログラムにニコニコ動画の動画を追加")
@@ -410,6 +417,7 @@ def create_add_program_niconico_video_tab(
 
             project = fetch_project_data(
                 project_id=project_id,
+                hasura_endpoint=hasura_endpoint,
             )
 
             return gr.Dropdown.update(
@@ -466,6 +474,7 @@ def create_add_program_niconico_video_tab(
                 thumbnail_url=thumbnail_url,
                 remote_niconico_account_id=remote_niconico_account_id,
                 niconico_account_name=niconico_account_name,
+                hasura_endpoint=hasura_endpoint,
                 hasura_admin_secret=hasura_admin_secret,
             )
 

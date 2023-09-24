@@ -39,9 +39,11 @@ class InitialDataResponse(BaseModel):
     data: InitialDataResponseData
 
 
-def fetch_initial_data() -> InitialDataResponseData:
+def fetch_initial_data(
+    hasura_endpoint: str,
+) -> InitialDataResponseData:
     res = requests.post(
-        "https://amaterus-hasura.aoirint.com/v1/graphql",
+        hasura_endpoint,
         json={
             "query": """
 query {
@@ -92,9 +94,10 @@ class ProjectDataResponse(BaseModel):
 
 def fetch_project_data(
     project_id: str,
+    hasura_endpoint: str,
 ) -> ProjectDataResponseProject:
     res = requests.post(
-        "https://amaterus-hasura.aoirint.com/v1/graphql",
+        hasura_endpoint,
         json={
             "query": """
 query A(
@@ -186,9 +189,10 @@ class TwitterAccountDataResponse(BaseModel):
 
 def fetch_twitter_account_by_screen_name(
     screen_name: str,
+    hasura_endpoint: str,
 ) -> TwitterAccountDataResponseTwitterAccount:
     res = requests.post(
-        "https://amaterus-hasura.aoirint.com/v1/graphql",
+        hasura_endpoint,
         json={
             "query": """
 query A(
@@ -243,10 +247,11 @@ def add_program_twitter_announcement(
     tweet_embed_html: str,
     twitter_tweet_image_index: int,
     twitter_tweet_image_url: str,
+    hasura_endpoint: str,
     hasura_admin_secret: str,
 ) -> AddProgramTwitterAnnouncementResponseProgramTwitterAnnouncement:
     res = requests.post(
-        "https://amaterus-hasura.aoirint.com/v1/graphql",
+        hasura_endpoint,
         headers={
             "X-Hasura-Admin-Secret": hasura_admin_secret,
         },
@@ -321,10 +326,13 @@ mutation A(
 
 
 def create_add_program_twitter_announcement_tab(
+    hasura_endpoint: str,
     hasura_admin_secret: str,
     logger: Logger,
 ) -> gr.Tab:
-    initial_data = fetch_initial_data()
+    initial_data = fetch_initial_data(
+        hasura_endpoint=hasura_endpoint,
+    )
 
     with gr.Tab(label="プログラムにXの投稿を追加") as tab:
         gr.Markdown("# プログラムにXの投稿を追加")
@@ -452,6 +460,7 @@ def create_add_program_twitter_announcement_tab(
 
             project = fetch_project_data(
                 project_id=project_id,
+                hasura_endpoint=hasura_endpoint,
             )
 
             return gr.Dropdown.update(
@@ -502,6 +511,7 @@ def create_add_program_twitter_announcement_tab(
 
             twitter_account = fetch_twitter_account_by_screen_name(
                 screen_name=screen_name,
+                hasura_endpoint=hasura_endpoint,
             )
 
             return [
@@ -534,6 +544,7 @@ def create_add_program_twitter_announcement_tab(
                 tweet_embed_html=tweet_embed_html,
                 twitter_tweet_image_index=int(twitter_tweet_image_index),
                 twitter_tweet_image_url=twitter_tweet_image_url,
+                hasura_endpoint=hasura_endpoint,
                 hasura_admin_secret=hasura_admin_secret,
             )
 
