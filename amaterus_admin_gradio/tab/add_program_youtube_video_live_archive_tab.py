@@ -329,6 +329,7 @@ def create_add_program_youtube_video_live_archive_tab(
                     )
                 with gr.Row():
                     is_premiere_checkbox_field = gr.Checkbox(label="プレミア公開?")
+                with gr.Row():
                     start_time_text_field = gr.Textbox(
                         label="開始時間",
                         interactive=True,
