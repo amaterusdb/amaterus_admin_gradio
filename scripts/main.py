@@ -10,8 +10,8 @@ from amaterus_admin_gradio.tab import (
     create_add_program_niconico_video_tab,
     create_add_program_tab,
     create_add_program_twitter_announcement_tab,
-    create_add_program_youtube_live_live_archive_tab,
     create_add_program_youtube_video_live_archive_tab,
+    create_create_program_youtube_live_live_archive_tab,
 )
 from amaterus_admin_gradio.utility.logging_utility import setup_logger
 from dotenv import load_dotenv
@@ -80,10 +80,8 @@ def launch_gradio(
             hasura_admin_secret=hasura_admin_secret,
             logger=logger,
         )
-        create_add_program_youtube_live_live_archive_tab(
+        create_create_program_youtube_live_live_archive_tab(
             graphql_client=graphql_client,
-            hasura_endpoint=hasura_endpoint,
-            hasura_admin_secret=hasura_admin_secret,
             youtube_api_key=youtube_api_key,
             logger=logger,
         )
