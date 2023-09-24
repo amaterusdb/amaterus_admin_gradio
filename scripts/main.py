@@ -7,8 +7,8 @@ from pathlib import Path
 import gradio as gr
 from amaterus_admin_gradio.graphql_client.client import Client
 from amaterus_admin_gradio.tab import (
-    create_add_program_niconico_video_tab,
     create_add_program_youtube_video_live_archive_tab,
+    create_create_program_niconico_video_tab,
     create_create_program_tab,
     create_create_program_twitter_announcement_tab,
     create_create_program_youtube_live_live_archive_tab,
@@ -89,7 +89,7 @@ def launch_gradio(
             youtube_api_key=youtube_api_key,
             logger=logger,
         )
-        create_add_program_niconico_video_tab(
+        create_create_program_niconico_video_tab(
             hasura_endpoint=hasura_endpoint,
             hasura_admin_secret=hasura_admin_secret,
             logger=logger,

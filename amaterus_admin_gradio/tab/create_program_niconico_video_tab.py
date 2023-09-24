@@ -82,7 +82,7 @@ def fetch_niconico_video_data(
     return api_data_response
 
 
-def create_add_program_niconico_video_tab(
+def create_create_program_niconico_video_tab(
     graphql_client: Client,
     logger: Logger,
 ) -> gr.Tab:
