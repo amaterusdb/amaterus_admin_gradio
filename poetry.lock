@@ -66,6 +66,31 @@ test = ["anyio[trio]", "coverage[toml] (>=4.5)", "hypothesis (>=4.0)", "mock (>=
 trio = ["trio (<0.22)"]
 
 [[package]]
+name = "ariadne-codegen"
+version = "0.9.0"
+description = "Generate fully typed GraphQL client from schema, queries and mutations!"
+optional = false
+python-versions = "*"
+files = [
+    {file = "ariadne_codegen-0.9.0-py2.py3-none-any.whl", hash = "sha256:d930333af151a346c02f395e3e6ee754abbd1c049018c05b41966a748a1f2dbe"},
+    {file = "ariadne_codegen-0.9.0.tar.gz", hash = "sha256:bd7132053e3772dadb6eb38ec3e73533bed97a03827e534b06475dff50f94eb5"},
+]
+
+[package.dependencies]
+autoflake = "*"
+black = "*"
+click = ">=8.1,<9.0"
+graphql-core = ">=3.2.0,<3.3"
+httpx = ">=0.23,<1.0"
+isort = "*"
+pydantic = ">=2.0.0,<3.0.0"
+toml = ">=0.10,<1.0"
+
+[package.extras]
+dev = ["ariadne", "freezegun", "mypy", "pylint", "pytest", "pytest-asyncio", "pytest-httpx", "pytest-mock", "requests-toolbelt", "types-toml"]
+subscriptions = ["websockets (>=11.0,<12.0)"]
+
+[[package]]
 name = "attrs"
 version = "23.1.0"
 description = "Classes Without Boilerplate"
@@ -82,6 +107,20 @@ dev = ["attrs[docs,tests]", "pre-commit"]
 docs = ["furo", "myst-parser", "sphinx", "sphinx-notfound-page", "sphinxcontrib-towncrier", "towncrier", "zope-interface"]
 tests = ["attrs[tests-no-zope]", "zope-interface"]
 tests-no-zope = ["cloudpickle", "hypothesis", "mypy (>=1.1.1)", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins", "pytest-xdist[psutil]"]
+
+[[package]]
+name = "autoflake"
+version = "2.2.1"
+description = "Removes unused imports and unused variables"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "autoflake-2.2.1-py3-none-any.whl", hash = "sha256:265cde0a43c1f44ecfb4f30d95b0437796759d07be7706a2f70e4719234c0f79"},
+    {file = "autoflake-2.2.1.tar.gz", hash = "sha256:62b7b6449a692c3c9b0c916919bbc21648da7281e8506bcf8d3f8280e431ebc1"},
+]
+
+[package.dependencies]
+pyflakes = ">=3.0.0"
 
 [[package]]
 name = "beautifulsoup4"
@@ -624,6 +663,17 @@ packaging = "*"
 requests = ">=2.0,<3.0"
 typing-extensions = ">=4.0,<5.0"
 websockets = ">=10.0,<12.0"
+
+[[package]]
+name = "graphql-core"
+version = "3.2.3"
+description = "GraphQL implementation for Python, a port of GraphQL.js, the JavaScript reference implementation for GraphQL."
+optional = false
+python-versions = ">=3.6,<4"
+files = [
+    {file = "graphql-core-3.2.3.tar.gz", hash = "sha256:06d2aad0ac723e35b1cb47885d3e5c45e956a53bc1b209a9fc5369007fe46676"},
+    {file = "graphql_core-3.2.3-py3-none-any.whl", hash = "sha256:5766780452bd5ec8ba133f8bf287dc92713e3868ddd83aee4faab9fc3e303dc3"},
+]
 
 [[package]]
 name = "h11"
@@ -2012,6 +2062,17 @@ anyio = ">=3.4.0,<5"
 full = ["httpx (>=0.22.0)", "itsdangerous", "jinja2", "python-multipart", "pyyaml"]
 
 [[package]]
+name = "toml"
+version = "0.10.2"
+description = "Python Library for Tom's Obvious, Minimal Language"
+optional = false
+python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
+files = [
+    {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
+    {file = "toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"},
+]
+
+[[package]]
 name = "tomlkit"
 version = "0.12.1"
 description = "Style preserving TOML library"
@@ -2239,4 +2300,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11"
-content-hash = "67ad595c4f67002a374c68bc4451585b92825a71f3f58aa98328e9ad64431874"
+content-hash = "3b3a281b8469202d8b3b679b1fd73d4ef243af3c928e8012757765969992aaa5"
