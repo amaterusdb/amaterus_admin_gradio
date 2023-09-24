@@ -9,10 +9,13 @@ enable_mypy = true
 mypy_preset = "strict"
 line_length = 88
 py_version = "py311"
+mypy_ignore_packages = ["amaterus_admin_gradio.graphql_client.*"]
 
   [[tool.pysen.lint.mypy_targets]]
     paths = ["."]
 
+[tool.pysen.lint.source]
+  excludes = ["amaterus_admin_gradio/graphql_client/"]
 
 [tool.ariadne-codegen]
 queries_path = "amaterus_admin_gradio/"
