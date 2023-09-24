@@ -8,9 +8,9 @@ import gradio as gr
 from amaterus_admin_gradio.graphql_client.client import Client
 from amaterus_admin_gradio.tab import (
     create_add_program_niconico_video_tab,
-    create_add_program_tab,
     create_add_program_twitter_announcement_tab,
     create_add_program_youtube_video_live_archive_tab,
+    create_create_program_tab,
     create_create_program_youtube_live_live_archive_tab,
 )
 from amaterus_admin_gradio.utility.logging_utility import setup_logger
@@ -70,7 +70,7 @@ def launch_gradio(
     with gr.Blocks(
         title="Amaterus Admin Gradio",
     ) as demo:
-        create_add_program_tab(
+        create_create_program_tab(
             graphql_client=graphql_client,
             logger=logger,
         )

@@ -10,7 +10,7 @@ from ..graphql_client import Client
 JST = ZoneInfo("Asia/Tokyo")
 
 
-def create_add_program_tab(
+def create_create_program_tab(
     graphql_client: Client,
     logger: Logger,
 ) -> gr.Tab:
