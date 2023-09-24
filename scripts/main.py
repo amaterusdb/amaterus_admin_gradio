@@ -61,7 +61,7 @@ def launch_gradio(
         )
 
     graphql_client = Client(
-        url="https://amaterus-hasura.aoirint.com/v1/graphql",
+        url=hasura_endpoint,
         headers={
             "X-Hasura-Admin-Secret": hasura_admin_secret,
         },
