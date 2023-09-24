@@ -90,8 +90,7 @@ def launch_gradio(
             logger=logger,
         )
         create_create_program_niconico_video_tab(
-            hasura_endpoint=hasura_endpoint,
-            hasura_admin_secret=hasura_admin_secret,
+            graphql_client=graphql_client,
             logger=logger,
         )
 
