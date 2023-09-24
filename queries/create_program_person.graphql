@@ -1,0 +1,15 @@
+mutation CreateProgramPerson(
+    $program_id: uuid!
+    $person_id: uuid!
+    $is_absent: Boolean
+) {
+    program_person: insert_program_persons_one(
+        object: {
+            program_id: $program_id
+            person_id: $person_id
+            is_absent: $is_absent
+        }
+    ) {
+        id
+    }
+}
