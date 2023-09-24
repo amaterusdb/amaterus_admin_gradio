@@ -59,7 +59,7 @@ def fetch_twitter_tweet_oembed_data(
     return api_response
 
 
-def create_add_program_twitter_announcement_tab(
+def create_create_program_twitter_announcement_tab(
     graphql_client: Client,
     logger: Logger,
 ) -> gr.Tab:
