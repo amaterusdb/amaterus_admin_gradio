@@ -3,7 +3,6 @@ import os
 import re
 from datetime import datetime
 from logging import Logger
-from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
