@@ -13,51 +13,6 @@ from ..graphql_client.client import Client
 JST = ZoneInfo("Asia/Tokyo")
 
 
-class InitialDataResponseProject(BaseModel):
-    id: str
-    name: str
-
-
-class InitialDataResponsePerson(BaseModel):
-    id: str
-    name: str
-
-
-class InitialDataResponseData(BaseModel):
-    project_list: list[InitialDataResponseProject]
-    person_list: list[InitialDataResponsePerson]
-
-
-class InitialDataResponse(BaseModel):
-    data: InitialDataResponseData
-
-
-def fetch_initial_data(
-    hasura_endpoint: str,
-) -> InitialDataResponseData:
-    res = requests.post(
-        hasura_endpoint,
-        json={
-            "query": """
-query {
-    project_list: projects {
-        id
-        name
-    }
-
-    person_list: persons {
-        id
-        name
-    }
-}
-""",
-        },
-    )
-    res.raise_for_status()
-    initial_data_response = InitialDataResponse.model_validate(res.json())
-    return initial_data_response.data
-
-
 class YoutubeApiVideoResponseItemSnippet(BaseModel):
     title: str
     channelId: str
@@ -121,13 +76,11 @@ def fetch_youtube_live_data(
 
 def create_add_program_youtube_live_live_archive_tab(
     graphql_client: Client,
-    hasura_endpoint: str,
-    hasura_admin_secret: str,
     youtube_api_key: str,
     logger: Logger,
 ) -> gr.Tab:
-    initial_data = fetch_initial_data(
-        hasura_endpoint=hasura_endpoint,
+    initial_data = (
+        graphql_client.get_create_program_youtube_live_live_archive_initial_data()
     )
 
     with gr.Tab(label="プログラムに配信アーカイブを追加") as tab:
