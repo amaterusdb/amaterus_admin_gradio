@@ -8,6 +8,7 @@ import gradio as gr
 from amaterus_admin_gradio.tab import (
     create_add_program_live_archive_tab,
     create_add_program_niconico_video_tab,
+    create_add_program_tab,
     create_add_program_twitter_announcement_tab,
     create_add_program_youtube_video_live_archive_tab,
 )
@@ -73,6 +74,10 @@ def launch_gradio(
             logger=logger,
         )
         create_add_program_twitter_announcement_tab(
+            hasura_admin_secret=hasura_admin_secret,
+            logger=logger,
+        )
+        create_add_program_tab(
             hasura_admin_secret=hasura_admin_secret,
             logger=logger,
         )
