@@ -10,125 +10,9 @@ import gradio as gr
 import requests
 from pydantic import BaseModel
 
+from ..graphql_client import Client
+
 JST = ZoneInfo("Asia/Tokyo")
-
-
-class InitialDataResponseProject(BaseModel):
-    id: str
-    name: str
-
-
-class InitialDataResponsePerson(BaseModel):
-    id: str
-    name: str
-
-
-class InitialDataResponseTwitterAccount(BaseModel):
-    id: str
-    twitter_screen_name: str
-    name: str
-
-
-class InitialDataResponseData(BaseModel):
-    project_list: list[InitialDataResponseProject]
-    person_list: list[InitialDataResponsePerson]
-    twitter_account_list: list[InitialDataResponseTwitterAccount]
-
-
-class InitialDataResponse(BaseModel):
-    data: InitialDataResponseData
-
-
-def fetch_initial_data(
-    hasura_endpoint: str,
-) -> InitialDataResponseData:
-    res = requests.post(
-        hasura_endpoint,
-        json={
-            "query": """
-query {
-    project_list: projects {
-        id
-        name
-    }
-
-    person_list: persons {
-        id
-        name
-    }
-
-    twitter_account_list: twitter_accounts {
-        id
-        twitter_screen_name
-        name
-    }
-}
-""",
-        },
-    )
-    res.raise_for_status()
-    initial_data_response = InitialDataResponse.model_validate(res.json())
-    return initial_data_response.data
-
-
-class ProjectDataResponseProgram(BaseModel):
-    id: str
-    title: str
-
-
-class ProjectDataResponseProgramProject(BaseModel):
-    program: ProjectDataResponseProgram
-
-
-class ProjectDataResponseProject(BaseModel):
-    program_project_list: list[ProjectDataResponseProgramProject]
-
-
-class ProjectDataResponseData(BaseModel):
-    project: ProjectDataResponseProject
-
-
-class ProjectDataResponse(BaseModel):
-    data: ProjectDataResponseData
-
-
-def fetch_project_data(
-    project_id: str,
-    hasura_endpoint: str,
-) -> ProjectDataResponseProject:
-    res = requests.post(
-        hasura_endpoint,
-        json={
-            "query": """
-query A(
-    $projectId: uuid!
-) {
-    project: projects_by_pk(
-        id: $projectId
-    ) {
-        program_project_list: program_projects(
-            order_by: {
-                program: {
-                    start_time: desc
-                }
-            }
-        ) {
-            program {
-                id
-                title
-            }
-        }
-    }
-}
-""",
-            "variables": {
-                "projectId": project_id,
-            },
-        },
-    )
-    res.raise_for_status()
-    project_data_response = ProjectDataResponse.model_validate(res.json())
-    return project_data_response.data.project
 
 
 class FetchTwitterTweetOembedApiResponse(BaseModel):
@@ -175,164 +59,11 @@ def fetch_twitter_tweet_oembed_data(
     return api_response
 
 
-class TwitterAccountDataResponseTwitterAccount(BaseModel):
-    id: str
-
-
-class TwitterAccountDataResponseData(BaseModel):
-    twitter_account_list: list[TwitterAccountDataResponseTwitterAccount]
-
-
-class TwitterAccountDataResponse(BaseModel):
-    data: TwitterAccountDataResponseData
-
-
-def fetch_twitter_account_by_screen_name(
-    screen_name: str,
-    hasura_endpoint: str,
-) -> TwitterAccountDataResponseTwitterAccount:
-    res = requests.post(
-        hasura_endpoint,
-        json={
-            "query": """
-query A(
-    $twitterScreenName: String!
-) {
-    twitter_account_list: twitter_accounts(
-        where: {
-            twitter_screen_name: {
-                _eq: $twitterScreenName
-            }
-        }
-        order_by: {
-            name: asc
-        }
-        limit: 1
-    ) {
-        id
-    }
-}
-""",
-            "variables": {
-                "twitterScreenName": screen_name,
-            },
-        },
-    )
-    res.raise_for_status()
-    print(res.json())
-    twitter_account_data_response = TwitterAccountDataResponse.model_validate(
-        res.json()
-    )
-    return twitter_account_data_response.data.twitter_account_list[0]
-
-
-class AddProgramTwitterAnnouncementResponseProgramTwitterAnnouncement(BaseModel):
-    id: str
-
-
-class AddProgramTwitterAnnouncementResponseData(BaseModel):
-    program_twitter_announcement: AddProgramTwitterAnnouncementResponseProgramTwitterAnnouncement  # noqa: B950
-
-
-class AddProgramTwitterAnnouncementResponse(BaseModel):
-    data: AddProgramTwitterAnnouncementResponseData
-
-
-def add_program_twitter_announcement(
-    program_id: str,
-    person_id: str,
-    remote_tweet_id: str,
-    twitter_account_id: str,
-    tweet_time: datetime,
-    tweet_embed_html: str,
-    twitter_tweet_image_index: int,
-    twitter_tweet_image_url: str,
-    hasura_endpoint: str,
-    hasura_admin_secret: str,
-) -> AddProgramTwitterAnnouncementResponseProgramTwitterAnnouncement:
-    res = requests.post(
-        hasura_endpoint,
-        headers={
-            "X-Hasura-Admin-Secret": hasura_admin_secret,
-        },
-        json={
-            "query": """
-mutation A(
-    $programId: uuid!
-    $personId: uuid!
-    $remoteTweetId: String!
-    $twitterAccountId: uuid!
-    $tweetTime: timestamptz!
-    $tweetEmbedHtml: String!
-    $twitterTweetImageIndex: Int!
-    $twitterTweetImageUrl: String!
-) {
-    program_twitter_announcement: insert_program_twitter_announcements_one(
-        object: {
-            program_id: $programId
-            person_id: $personId
-            twitter_tweet: {
-                data: {
-                    remote_tweet_id: $remoteTweetId
-                    tweet_time: $tweetTime
-                    tweet_embed_html: $tweetEmbedHtml
-                    twitter_account_id: $twitterAccountId
-                    twitter_tweet_images: {
-                        data: {
-                            index: $twitterTweetImageIndex
-                            url: $twitterTweetImageUrl
-                        }
-                        on_conflict: {
-                            constraint: twitter_tweet_images_tweet_id_index_key
-                            update_columns: [
-                                index
-                                url
-                            ]
-                        }
-                    }
-                }
-                on_conflict: {
-                    constraint: twitter_tweets_remote_tweet_id_key
-                    update_columns: [
-                        tweet_time
-                        tweet_embed_html
-                    ]
-                }
-            }
-        }
-    ) {
-        id
-    }
-}
-""".strip(),
-            "variables": {
-                "programId": program_id,
-                "personId": person_id,
-                "remoteTweetId": remote_tweet_id,
-                "twitterAccountId": twitter_account_id,
-                "tweetTime": tweet_time.isoformat(),
-                "tweetEmbedHtml": tweet_embed_html,
-                "twitterTweetImageIndex": twitter_tweet_image_index,
-                "twitterTweetImageUrl": twitter_tweet_image_url,
-            },
-        },
-    )
-    print(res.json())
-    res.raise_for_status()
-    add_program_twitter_tweet_response = (
-        AddProgramTwitterAnnouncementResponse.model_validate(res.json())
-    )
-    return add_program_twitter_tweet_response.data.program_twitter_announcement
-
-
 def create_add_program_twitter_announcement_tab(
-    hasura_endpoint: str,
-    hasura_admin_secret: str,
+    graphql_client: Client,
     logger: Logger,
 ) -> gr.Tab:
-    initial_data = fetch_initial_data(
-        hasura_endpoint=hasura_endpoint,
-    )
+    initial_data = graphql_client.get_create_program_twitter_announcement_initial_data()
 
     with gr.Tab(label="プログラムにXの投稿を追加") as tab:
         gr.Markdown("# プログラムにXの投稿を追加")
@@ -458,10 +189,12 @@ def create_add_program_twitter_announcement_tab(
                     choices=None,
                 )
 
-            project = fetch_project_data(
+            response = graphql_client.get_program_project_list_by_project_id(
                 project_id=project_id,
-                hasura_endpoint=hasura_endpoint,
             )
+            project = response.project
+            if project is None:
+                raise Exception("Project must not be None")
 
             return gr.Dropdown.update(
                 choices=list(
@@ -509,10 +242,14 @@ def create_add_program_twitter_announcement_tab(
 
             sanitized_html = sanitized_html.strip()
 
-            twitter_account = fetch_twitter_account_by_screen_name(
-                screen_name=screen_name,
-                hasura_endpoint=hasura_endpoint,
+            response = graphql_client.get_twitter_account_by_screen_name(
+                twitter_screen_name=screen_name,
             )
+            twitter_account_list = response.twitter_account_list
+            if len(twitter_account_list) == 0:
+                raise Exception("The length of Twitter Account List must not be zero")
+
+            twitter_account = twitter_account_list[0]
 
             return [
                 remote_tweet_id,
@@ -535,7 +272,7 @@ def create_add_program_twitter_announcement_tab(
         ) -> Any:
             tweet_time = datetime.fromisoformat(tweet_time_string)
 
-            program_twitter_announcement = add_program_twitter_announcement(
+            response = graphql_client.create_program_twitter_announcement(
                 program_id=program_id,
                 person_id=person_id,
                 remote_tweet_id=remote_tweet_id,
@@ -544,9 +281,10 @@ def create_add_program_twitter_announcement_tab(
                 tweet_embed_html=tweet_embed_html,
                 twitter_tweet_image_index=int(twitter_tweet_image_index),
                 twitter_tweet_image_url=twitter_tweet_image_url,
-                hasura_endpoint=hasura_endpoint,
-                hasura_admin_secret=hasura_admin_secret,
             )
+            program_twitter_announcement = response.program_twitter_announcement
+            if program_twitter_announcement is None:
+                raise Exception("program_twitter_announcement must not be None")
 
             return [
                 program_twitter_announcement.id,

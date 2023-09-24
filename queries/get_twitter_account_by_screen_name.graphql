@@ -1,0 +1,17 @@
+query GetTwitterAccountByScreenName(
+    $twitterScreenName: String!
+) {
+    twitter_account_list: twitter_accounts(
+        where: {
+            twitter_screen_name: {
+                _eq: $twitterScreenName
+            }
+        }
+        order_by: {
+            name: asc
+        }
+        limit: 1
+    ) {
+        id
+    }
+}

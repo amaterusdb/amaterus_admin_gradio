@@ -1,0 +1,17 @@
+query GetCreateProgramTwitterAnnouncementInitialData {
+    project_list: projects {
+        id
+        name
+    }
+
+    person_list: persons {
+        id
+        name
+    }
+
+    twitter_account_list: twitter_accounts {
+        id
+        twitter_screen_name
+        name
+    }
+}

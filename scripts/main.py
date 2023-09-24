@@ -75,8 +75,7 @@ def launch_gradio(
             logger=logger,
         )
         create_add_program_twitter_announcement_tab(
-            hasura_endpoint=hasura_endpoint,
-            hasura_admin_secret=hasura_admin_secret,
+            graphql_client=graphql_client,
             logger=logger,
         )
         create_create_program_youtube_live_live_archive_tab(
