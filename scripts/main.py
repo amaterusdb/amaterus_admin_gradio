@@ -84,8 +84,7 @@ def launch_gradio(
             logger=logger,
         )
         create_add_program_youtube_video_live_archive_tab(
-            hasura_endpoint=hasura_endpoint,
-            hasura_admin_secret=hasura_admin_secret,
+            graphql_client=graphql_client,
             youtube_api_key=youtube_api_key,
             logger=logger,
         )

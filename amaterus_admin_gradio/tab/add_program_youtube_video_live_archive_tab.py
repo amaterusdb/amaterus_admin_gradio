@@ -8,112 +8,9 @@ import gradio as gr
 import requests
 from pydantic import BaseModel
 
+from ..graphql_client import Client
+
 JST = ZoneInfo("Asia/Tokyo")
-
-
-class InitialDataResponseProject(BaseModel):
-    id: str
-    name: str
-
-
-class InitialDataResponsePerson(BaseModel):
-    id: str
-    name: str
-
-
-class InitialDataResponseData(BaseModel):
-    project_list: list[InitialDataResponseProject]
-    person_list: list[InitialDataResponsePerson]
-
-
-class InitialDataResponse(BaseModel):
-    data: InitialDataResponseData
-
-
-def fetch_initial_data(
-    hasura_endpoint: str,
-) -> InitialDataResponseData:
-    res = requests.post(
-        hasura_endpoint,
-        json={
-            "query": """
-query {
-    project_list: projects {
-        id
-        name
-    }
-
-    person_list: persons {
-        id
-        name
-    }
-}
-""",
-        },
-    )
-    res.raise_for_status()
-    initial_data_response = InitialDataResponse.model_validate(res.json())
-    return initial_data_response.data
-
-
-class ProjectDataResponseProgram(BaseModel):
-    id: str
-    title: str
-
-
-class ProjectDataResponseProgramProject(BaseModel):
-    program: ProjectDataResponseProgram
-
-
-class ProjectDataResponseProject(BaseModel):
-    program_project_list: list[ProjectDataResponseProgramProject]
-
-
-class ProjectDataResponseData(BaseModel):
-    project: ProjectDataResponseProject
-
-
-class ProjectDataResponse(BaseModel):
-    data: ProjectDataResponseData
-
-
-def fetch_project_data(
-    project_id: str,
-    hasura_endpoint: str,
-) -> ProjectDataResponseProject:
-    res = requests.post(
-        hasura_endpoint,
-        json={
-            "query": """
-query A(
-    $projectId: uuid!
-) {
-    project: projects_by_pk(
-        id: $projectId
-    ) {
-        program_project_list: program_projects(
-            order_by: {
-                program: {
-                    start_time: desc
-                }
-            }
-        ) {
-            program {
-                id
-                title
-            }
-        }
-    }
-}
-""",
-            "variables": {
-                "projectId": project_id,
-            },
-        },
-    )
-    res.raise_for_status()
-    project_data_response = ProjectDataResponse.model_validate(res.json())
-    return project_data_response.data.project
 
 
 class YoutubeApiVideoResponseItemSnippet(BaseModel):
@@ -171,121 +68,13 @@ def fetch_youtube_video_data(
     return youtube_api_video_response
 
 
-class AddProgramLiveArchiveResponseProgramLiveArchive(BaseModel):
-    id: str
-
-
-class AddProgramLiveArchiveResponseData(BaseModel):
-    program_live_archive: AddProgramLiveArchiveResponseProgramLiveArchive
-
-
-class AddProgramLiveArchiveResponse(BaseModel):
-    data: AddProgramLiveArchiveResponseData
-
-
-def add_program_youtube_video_live_archive(
-    program_id: str,
-    person_id: str,
-    post_time: datetime,
-    start_time: datetime,
-    end_time: datetime,
-    remote_youtube_video_id: str,
-    title: str,
-    is_premiere: bool,
-    remote_youtube_channel_id: str,
-    youtube_channel_name: str,
-    hasura_endpoint: str,
-    hasura_admin_secret: str,
-) -> AddProgramLiveArchiveResponseProgramLiveArchive:
-    res = requests.post(
-        hasura_endpoint,
-        headers={
-            "X-Hasura-Admin-Secret": hasura_admin_secret,
-        },
-        json={
-            "query": """
-mutation A(
-  $programId: uuid!
-  $personId: uuid!
-  $postTime: timestamptz!
-  $startTime: timestamptz!
-  $endTime: timestamptz!
-  $remoteYoutubeVideoId: String!
-  $title: String!
-  $isPremiere: Boolean!
-  $remoteYoutubeChannelId: String!
-  $youtubeChannelName: String!
-) {
-    program_live_archive: insert_program_live_archives_one(
-        object: {
-            program_id: $programId
-            person_id: $personId
-            start_time: $startTime
-            end_time: $endTime
-            youtube_video: {
-                data: {
-                    remote_youtube_video_id: $remoteYoutubeVideoId
-                    title: $title
-                    post_time: $postTime
-                    is_premiere: $isPremiere
-                    youtube_channel: {
-                        data: {
-                            remote_youtube_channel_id: $remoteYoutubeChannelId
-                            name: $youtubeChannelName
-                        }
-                        on_conflict: {
-                            constraint: youtube_channels_youtube_channel_id_key
-                            update_columns: [
-                                name
-                            ]
-                        }
-                    }
-                }
-                on_conflict: {
-                    constraint: youtube_videos_remote_youtube_video_id_key
-                    update_columns: [
-                        title
-                        post_time
-                        is_premiere
-                    ]
-                }
-            }
-        }
-    ) {
-        id
-    }
-}
-""",
-            "variables": {
-                "programId": program_id,
-                "personId": person_id,
-                "postTime": post_time.isoformat() if post_time is not None else None,
-                "startTime": start_time.isoformat() if start_time is not None else None,
-                "endTime": end_time.isoformat() if end_time is not None else None,
-                "remoteYoutubeVideoId": remote_youtube_video_id,
-                "title": title,
-                "isPremiere": is_premiere,
-                "remoteYoutubeChannelId": remote_youtube_channel_id,
-                "youtubeChannelName": youtube_channel_name,
-            },
-        },
-    )
-    print(res.json())
-    res.raise_for_status()
-    add_program_live_archive_response = AddProgramLiveArchiveResponse.model_validate(
-        res.json()
-    )
-    return add_program_live_archive_response.data.program_live_archive
-
-
 def create_add_program_youtube_video_live_archive_tab(
+    graphql_client: Client,
     youtube_api_key: str,
-    hasura_endpoint: str,
-    hasura_admin_secret: str,
     logger: Logger,
 ) -> gr.Tab:
-    initial_data = fetch_initial_data(
-        hasura_endpoint=hasura_endpoint,
+    initial_data = (
+        graphql_client.get_create_program_youtube_video_live_archive_initial_data()
     )
 
     with gr.Tab(label="プログラムに動画として投稿された配信アーカイブを追加") as tab:
@@ -398,10 +187,12 @@ def create_add_program_youtube_video_live_archive_tab(
                     choices=None,
                 )
 
-            project = fetch_project_data(
+            response = graphql_client.get_program_project_list_by_project_id(
                 project_id=project_id,
-                hasura_endpoint=hasura_endpoint,
             )
+            project = response.project
+            if project is None:
+                raise Exception("Project must not be None")
 
             return gr.Dropdown.update(
                 choices=list(
@@ -467,7 +258,7 @@ def create_add_program_youtube_video_live_archive_tab(
             start_time = datetime.fromisoformat(start_time_string)
             end_time = datetime.fromisoformat(end_time_string)
 
-            program_live_archive = add_program_youtube_video_live_archive(
+            response = graphql_client.create_program_youtube_video_live_archive(
                 program_id=program_id,
                 person_id=person_id,
                 post_time=post_time,
@@ -478,9 +269,10 @@ def create_add_program_youtube_video_live_archive_tab(
                 is_premiere=is_premiere,
                 remote_youtube_channel_id=remote_youtube_channel_id,
                 youtube_channel_name=youtube_channel_name,
-                hasura_endpoint=hasura_endpoint,
-                hasura_admin_secret=hasura_admin_secret,
             )
+            program_live_archive = response.program_live_archive
+            if program_live_archive is None:
+                raise Exception("program_live_archive must not be None")
 
             return [
                 program_live_archive.id,
