@@ -18,3 +18,15 @@ sudo docker push docker.aoirint.com/aoirint/amaterus_admin_gradio
 poetry export --without-hashes -o requirements.txt
 poetry export --without-hashes --with dev -o requirements-dev.txt
 ```
+
+## GraphQL Code Generation
+
+- Node 20
+
+```shell
+npm install -g graphqurl
+```
+
+```shell
+gq "https://amaterus-hasura.aoirint.com/v1/graphql" --introspect > schema.graphql
+```
