@@ -68,7 +68,7 @@ def fetch_youtube_video_data(
     return youtube_api_video_response
 
 
-def create_add_program_youtube_video_live_archive_tab(
+def create_create_program_youtube_video_live_archive_tab(
     graphql_client: Client,
     youtube_api_key: str,
     logger: Logger,
