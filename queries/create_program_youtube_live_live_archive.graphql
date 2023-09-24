@@ -1,0 +1,49 @@
+mutation CreateProgramYoutubeLiveLiveArchive(
+    $programId: uuid!
+    $personId: uuid!
+    $startTime: timestamptz
+    $endTime: timestamptz
+    $remoteYoutubeVideoId: String!
+    $title: String!
+    $remoteYoutubeChannelId: String!
+    $youtubeChannelName: String!
+) {
+    program_live_archive: insert_program_live_archives_one(
+        object: {
+            program_id: $programId
+            person_id: $personId
+            start_time: $startTime
+            end_time: $endTime
+            youtube_live: {
+                data: {
+                    remote_youtube_video_id: $remoteYoutubeVideoId
+                    title: $title
+                    start_time: $startTime
+                    end_time: $endTime
+                    youtube_channel: {
+                        data: {
+                            remote_youtube_channel_id: $remoteYoutubeChannelId
+                            name: $youtubeChannelName
+                        }
+                        on_conflict: {
+                            constraint: youtube_channels_youtube_channel_id_key
+                            update_columns: [
+                                name
+                            ]
+                        }
+                    }
+                }
+                on_conflict: {
+                    constraint: youtube_lives_remote_youtube_video_id_key
+                    update_columns: [
+                        title
+                        start_time
+                        end_time
+                    ]
+                }
+            }
+        }
+    ) {
+        id
+    }
+}

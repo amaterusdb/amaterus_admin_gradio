@@ -119,107 +119,6 @@ def fetch_youtube_live_data(
     return ytlive_api_video_response
 
 
-class AddProgramLiveArchiveResponseProgramLiveArchive(BaseModel):
-    id: str
-
-
-class AddProgramLiveArchiveResponseData(BaseModel):
-    program_live_archive: AddProgramLiveArchiveResponseProgramLiveArchive
-
-
-class AddProgramLiveArchiveResponse(BaseModel):
-    data: AddProgramLiveArchiveResponseData
-
-
-def add_program_live_archive(
-    program_id: str,
-    person_id: str,
-    start_time: datetime | None,
-    end_time: datetime | None,
-    remote_youtube_video_id: str,
-    title: str,
-    remote_youtube_channel_id: str,
-    youtube_channel_name: str,
-    hasura_endpoint: str,
-    hasura_admin_secret: str,
-) -> AddProgramLiveArchiveResponseProgramLiveArchive:
-    res = requests.post(
-        hasura_endpoint,
-        headers={
-            "X-Hasura-Admin-Secret": hasura_admin_secret,
-        },
-        json={
-            "query": """
-mutation A(
-  $programId: uuid!
-  $personId: uuid!
-  $startTime: timestamptz
-  $endTime: timestamptz
-  $remoteYoutubeVideoId: String!
-  $title: String!
-  $remoteYoutubeChannelId: String!
-  $youtubeChannelName: String!
-) {
-    program_live_archive: insert_program_live_archives_one(
-        object: {
-            program_id: $programId
-            person_id: $personId
-            start_time: $startTime
-            end_time: $endTime
-            youtube_live: {
-                data: {
-                    remote_youtube_video_id: $remoteYoutubeVideoId
-                    title: $title
-                    start_time: $startTime
-                    end_time: $endTime
-                    youtube_channel: {
-                        data: {
-                            remote_youtube_channel_id: $remoteYoutubeChannelId
-                            name: $youtubeChannelName
-                        }
-                        on_conflict: {
-                            constraint: youtube_channels_youtube_channel_id_key
-                            update_columns: [
-                                name
-                            ]
-                        }
-                    }
-                }
-                on_conflict: {
-                    constraint: youtube_lives_remote_youtube_video_id_key
-                    update_columns: [
-                        title
-                        start_time
-                        end_time
-                    ]
-                }
-            }
-        }
-    ) {
-        id
-    }
-}
-""",
-            "variables": {
-                "programId": program_id,
-                "personId": person_id,
-                "startTime": start_time.isoformat() if start_time is not None else None,
-                "endTime": end_time.isoformat() if end_time is not None else None,
-                "remoteYoutubeVideoId": remote_youtube_video_id,
-                "title": title,
-                "remoteYoutubeChannelId": remote_youtube_channel_id,
-                "youtubeChannelName": youtube_channel_name,
-            },
-        },
-    )
-    print(res.json())
-    res.raise_for_status()
-    add_program_live_archive_response = AddProgramLiveArchiveResponse.model_validate(
-        res.json()
-    )
-    return add_program_live_archive_response.data.program_live_archive
-
-
 def create_add_program_live_archive_tab(
     graphql_client: Client,
     hasura_endpoint: str,
@@ -420,18 +319,20 @@ def create_add_program_live_archive_tab(
                 else None
             )
 
-            program_live_archive = add_program_live_archive(
+            response = graphql_client.create_program_youtube_live_live_archive(
                 program_id=program_id,
                 person_id=person_id,
-                start_time=start_time,
-                end_time=end_time,
                 remote_youtube_video_id=remote_youtube_video_id,
                 title=youtube_live_title,
                 remote_youtube_channel_id=remote_youtube_channel_id,
                 youtube_channel_name=youtube_channel_name,
-                hasura_endpoint=hasura_endpoint,
-                hasura_admin_secret=hasura_admin_secret,
+                start_time=start_time.isoformat() if start_time is not None else None,
+                end_time=end_time.isoformat() if end_time is not None else None,
             )
+
+            program_live_archive = response.program_live_archive
+            if program_live_archive is None:
+                raise Exception("program_live_archive must not be None")
 
             return [
                 program_live_archive.id,
