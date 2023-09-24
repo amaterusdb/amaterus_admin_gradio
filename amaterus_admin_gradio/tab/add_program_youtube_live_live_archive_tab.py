@@ -119,7 +119,7 @@ def fetch_youtube_live_data(
     return ytlive_api_video_response
 
 
-def create_add_program_live_archive_tab(
+def create_add_program_youtube_live_live_archive_tab(
     graphql_client: Client,
     hasura_endpoint: str,
     hasura_admin_secret: str,
