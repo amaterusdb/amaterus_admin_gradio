@@ -72,6 +72,9 @@ def add_program(
     end_time: datetime | None,
     hasura_admin_secret: str,
 ) -> AddProgramResponseProgram:
+    if len(title) == 0:
+        raise Exception("Empty program title is not allowed")
+
     res = requests.post(
         "https://amaterus-hasura.aoirint.com/v1/graphql",
         headers={
