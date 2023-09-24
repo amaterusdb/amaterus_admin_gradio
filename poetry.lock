@@ -85,6 +85,7 @@ httpx = ">=0.23,<1.0"
 isort = "*"
 pydantic = ">=2.0.0,<3.0.0"
 toml = ">=0.10,<1.0"
+websockets = {version = ">=11.0,<12.0", optional = true, markers = "extra == \"subscriptions\""}
 
 [package.extras]
 dev = ["ariadne", "freezegun", "mypy", "pylint", "pytest", "pytest-asyncio", "pytest-httpx", "pytest-mock", "requests-toolbelt", "types-toml"]
@@ -2300,4 +2301,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11"
-content-hash = "3b3a281b8469202d8b3b679b1fd73d4ef243af3c928e8012757765969992aaa5"
+content-hash = "db0bb4fc51b3db9302ef6e1306646ea2cd2fdf2e2e487f943f4edc4b222ffd24"
