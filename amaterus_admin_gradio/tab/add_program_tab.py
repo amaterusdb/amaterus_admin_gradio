@@ -29,9 +29,11 @@ class InitialDataResponse(BaseModel):
     data: InitialDataResponseData
 
 
-def fetch_initial_data() -> InitialDataResponseData:
+def fetch_initial_data(
+    hasura_endpoint: str,
+) -> InitialDataResponseData:
     res = requests.post(
-        "https://amaterus-hasura.aoirint.com/v1/graphql",
+        hasura_endpoint,
         json={
             "query": """
 query {
@@ -70,13 +72,14 @@ def add_program(
     title: str,
     start_time: datetime | None,
     end_time: datetime | None,
+    hasura_endpoint: str,
     hasura_admin_secret: str,
 ) -> AddProgramResponseProgram:
     if len(title) == 0:
         raise Exception("Empty program title is not allowed")
 
     res = requests.post(
-        "https://amaterus-hasura.aoirint.com/v1/graphql",
+        hasura_endpoint,
         headers={
             "X-Hasura-Admin-Secret": hasura_admin_secret,
         },
@@ -124,10 +127,13 @@ mutation A(
 
 
 def create_add_program_tab(
+    hasura_endpoint: str,
     hasura_admin_secret: str,
     logger: Logger,
 ) -> gr.Tab:
-    initial_data = fetch_initial_data()
+    initial_data = fetch_initial_data(
+        hasura_endpoint=hasura_endpoint,
+    )
 
     with gr.Tab(label="プログラムを追加") as tab:
         gr.Markdown("# プログラムを追加")
@@ -208,6 +214,7 @@ def create_add_program_tab(
                 title=title,
                 start_time=start_time,
                 end_time=end_time,
+                hasura_endpoint=hasura_endpoint,
                 hasura_admin_secret=hasura_admin_secret,
             )
 
