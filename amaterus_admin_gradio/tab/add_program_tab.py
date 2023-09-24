@@ -171,12 +171,12 @@ def create_add_program_tab(
                         interactive=True,
                     )
                 with gr.Row():
-                    add_program_youtube_video_live_archive_button = gr.Button(
+                    add_program_button = gr.Button(
                         value="プログラムを追加",
                         variant="primary",
                     )
                 with gr.Row():
-                    added_program_live_archive_id_text_field = gr.Textbox(
+                    added_program_id_text_field = gr.Textbox(
                         label="追加されたプログラムのデータベース上のID",
                         interactive=False,
                     )
@@ -219,10 +219,11 @@ def create_add_program_tab(
                 title_text_field,
                 start_time_text_field,
                 end_time_text_field,
+                added_program_id_text_field,
             ],
         )
 
-        add_program_youtube_video_live_archive_button.click(
+        add_program_button.click(
             fn=handle_add_program_button_clicked,
             inputs=[
                 project_drop,
@@ -232,7 +233,7 @@ def create_add_program_tab(
                 end_time_text_field,
             ],
             outputs=[
-                added_program_live_archive_id_text_field,
+                added_program_id_text_field,
             ],
         )
 
