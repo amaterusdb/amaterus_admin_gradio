@@ -63,8 +63,6 @@ def create_create_program_twitter_announcement_tab(
     graphql_client: Client,
     logger: Logger,
 ) -> gr.Tab:
-    initial_data = graphql_client.get_create_program_twitter_announcement_initial_data()
-
     with gr.Tab(label="プログラムにXの投稿を追加") as tab:
         gr.Markdown("# プログラムにXの投稿を追加")
         with gr.Row():
@@ -104,16 +102,6 @@ def create_create_program_twitter_announcement_tab(
                     twitter_account_drop = gr.Dropdown(
                         label="X アカウント",
                         interactive=True,
-                        choices=list(
-                            map(
-                                lambda twitter_account: (
-                                    f"{twitter_account.name} "
-                                    f"(@{twitter_account.twitter_screen_name})",
-                                    twitter_account.id,
-                                ),
-                                initial_data.twitter_account_list,
-                            ),
-                        ),
                     )
                 with gr.Row():
                     tweet_embed_html_text_field = gr.Textbox(
@@ -146,12 +134,6 @@ def create_create_program_twitter_announcement_tab(
                     project_drop = gr.Dropdown(
                         label="プロジェクト",
                         interactive=True,
-                        choices=list(
-                            map(
-                                lambda project: (project.name, project.id),
-                                initial_data.project_list,
-                            ),
-                        ),
                     )
                 with gr.Row():
                     program_drop = gr.Dropdown(
@@ -162,12 +144,6 @@ def create_create_program_twitter_announcement_tab(
                     person_drop = gr.Dropdown(
                         label="投稿者",
                         interactive=True,
-                        choices=list(
-                            map(
-                                lambda person: (person.name, person.id),
-                                initial_data.person_list,
-                            ),
-                        ),
                     )
                 with gr.Row():
                     add_program_twitter_announcement_button = gr.Button(
@@ -179,6 +155,41 @@ def create_create_program_twitter_announcement_tab(
                         label="追加された X の投稿のデータベース上のID",
                         interactive=False,
                     )
+
+        def handle_tab_selected() -> Any:
+            initial_data = (
+                graphql_client.get_create_program_twitter_announcement_initial_data()
+            )
+            return [
+                gr.Dropdown.update(
+                    choices=list(
+                        map(
+                            lambda twitter_account: (
+                                f"{twitter_account.name} "
+                                f"(@{twitter_account.twitter_screen_name})",
+                                twitter_account.id,
+                            ),
+                            initial_data.twitter_account_list,
+                        ),
+                    ),
+                ),
+                gr.Dropdown.update(
+                    choices=list(
+                        map(
+                            lambda project: (project.name, project.id),
+                            initial_data.project_list,
+                        ),
+                    ),
+                ),
+                gr.Dropdown.update(
+                    choices=list(
+                        map(
+                            lambda person: (person.name, person.id),
+                            initial_data.person_list,
+                        ),
+                    ),
+                ),
+            ]
 
         def handle_project_changed(
             project_id: str,
@@ -308,6 +319,15 @@ def create_create_program_twitter_announcement_tab(
             components=[
                 project_drop,
                 program_drop,
+                person_drop,
+            ],
+        )
+
+        tab.select(
+            fn=handle_tab_selected,
+            outputs=[
+                twitter_account_drop,
+                project_drop,
                 person_drop,
             ],
         )
