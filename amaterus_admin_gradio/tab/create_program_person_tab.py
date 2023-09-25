@@ -124,12 +124,6 @@ def create_create_program_person_tab(
                 program_person.id,
             ]
 
-        project_drop.select(
-            fn=handle_project_changed,
-            inputs=project_drop,
-            outputs=program_drop,
-        )
-
         clear_field_button.add(
             components=[
                 project_drop,
@@ -138,6 +132,12 @@ def create_create_program_person_tab(
                 is_absent_radio,
                 added_program_person_id_text_field,
             ],
+        )
+
+        project_drop.select(
+            fn=handle_project_changed,
+            inputs=project_drop,
+            outputs=program_drop,
         )
 
         add_program_person_button.click(
