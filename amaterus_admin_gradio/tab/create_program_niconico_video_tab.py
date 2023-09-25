@@ -85,8 +85,6 @@ def create_create_program_niconico_video_tab(
     graphql_client: Client,
     logger: Logger,
 ) -> gr.Tab:
-    initial_data = graphql_client.get_create_program_niconico_video_initial_data()
-
     with gr.Tab(label="プログラムにニコニコ動画の動画を追加") as tab:
         gr.Markdown("# プログラムにニコニコ動画の動画を追加")
         with gr.Row():
@@ -141,12 +139,6 @@ def create_create_program_niconico_video_tab(
                     project_drop = gr.Dropdown(
                         label="プロジェクト",
                         interactive=True,
-                        choices=list(
-                            map(
-                                lambda project: (project.name, project.id),
-                                initial_data.project_list,
-                            ),
-                        ),
                     )
                 with gr.Row():
                     program_drop = gr.Dropdown(
@@ -157,12 +149,6 @@ def create_create_program_niconico_video_tab(
                     person_drop = gr.Dropdown(
                         label="投稿者",
                         interactive=True,
-                        choices=list(
-                            map(
-                                lambda person: (person.name, person.id),
-                                initial_data.person_list,
-                            ),
-                        ),
                     )
                 with gr.Row():
                     add_niconico_video_button = gr.Button(
@@ -174,6 +160,29 @@ def create_create_program_niconico_video_tab(
                         label="追加された動画のデータベース上のID",
                         interactive=False,
                     )
+
+        def handle_tab_selected() -> Any:
+            initial_data = (
+                graphql_client.get_create_program_niconico_video_initial_data()
+            )
+            return [
+                gr.Dropdown.update(
+                    choices=list(
+                        map(
+                            lambda project: (project.name, project.id),
+                            initial_data.project_list,
+                        ),
+                    ),
+                ),
+                gr.Dropdown.update(
+                    choices=list(
+                        map(
+                            lambda person: (person.name, person.id),
+                            initial_data.person_list,
+                        ),
+                    ),
+                ),
+            ]
 
         def handle_project_changed(
             project_id: str,
@@ -269,6 +278,14 @@ def create_create_program_niconico_video_tab(
             components=[
                 project_drop,
                 program_drop,
+                person_drop,
+            ],
+        )
+
+        tab.select(
+            fn=handle_tab_selected,
+            outputs=[
+                project_drop,
                 person_drop,
             ],
         )
