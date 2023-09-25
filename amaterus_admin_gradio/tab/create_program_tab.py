@@ -14,8 +14,6 @@ def create_create_program_tab(
     graphql_client: Client,
     logger: Logger,
 ) -> gr.Tab:
-    initial_data = graphql_client.get_create_program_initial_data()
-
     with gr.Tab(label="プログラムを追加") as tab:
         gr.Markdown("# プログラムを追加")
         with gr.Row():
@@ -28,23 +26,11 @@ def create_create_program_tab(
                     project_drop = gr.Dropdown(
                         label="プロジェクト",
                         interactive=True,
-                        choices=list(
-                            map(
-                                lambda project: (project.name, project.id),
-                                initial_data.project_list,
-                            ),
-                        ),
                     )
                 with gr.Row():
                     game_drop = gr.Dropdown(
                         label="ゲーム",
                         interactive=True,
-                        choices=list(
-                            map(
-                                lambda game: (game.name, game.id),
-                                initial_data.game_list,
-                            ),
-                        ),
                     )
                 with gr.Row():
                     title_text_field = gr.Textbox(
@@ -70,6 +56,27 @@ def create_create_program_tab(
                         label="追加されたプログラムのデータベース上のID",
                         interactive=False,
                     )
+
+        def handle_tab_selected() -> Any:
+            initial_data = graphql_client.get_create_program_initial_data()
+            return [
+                gr.Dropdown.update(
+                    choices=list(
+                        map(
+                            lambda project: (project.name, project.id),
+                            initial_data.project_list,
+                        ),
+                    ),
+                ),
+                gr.Dropdown.update(
+                    choices=list(
+                        map(
+                            lambda game: (game.name, game.id),
+                            initial_data.game_list,
+                        ),
+                    ),
+                ),
+            ]
 
         def handle_add_program_button_clicked(
             project_id: str,
@@ -112,6 +119,14 @@ def create_create_program_tab(
                 start_time_text_field,
                 end_time_text_field,
                 added_program_id_text_field,
+            ],
+        )
+
+        tab.select(
+            fn=handle_tab_selected,
+            outputs=[
+                project_drop,
+                game_drop,
             ],
         )
 
