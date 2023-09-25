@@ -7,6 +7,7 @@ from pathlib import Path
 import gradio as gr
 from amaterus_admin_gradio.graphql_client.client import Client
 from amaterus_admin_gradio.tab import (
+    create_create_game_tab,
     create_create_program_niconico_video_tab,
     create_create_program_person_tab,
     create_create_program_tab,
@@ -71,6 +72,10 @@ def launch_gradio(
     with gr.Blocks(
         title="Amaterus Admin Gradio",
     ) as demo:
+        create_create_game_tab(
+            graphql_client=graphql_client,
+            logger=logger,
+        )
         create_create_program_tab(
             graphql_client=graphql_client,
             logger=logger,

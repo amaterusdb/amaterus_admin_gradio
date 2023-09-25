@@ -1,0 +1,25 @@
+mutation CreateGame(
+  $name: String!
+  $steam_url: String
+  $epic_games_url: String
+  $nintendo_switch_url: String
+  $playstation_url: String
+  $google_play_store_url: String
+  $apple_app_store_url: String
+  $website_url: String
+) {
+    game: insert_games_one(
+        object: {
+            name: $name
+            steam_url: $steam_url
+            epic_games_url: $epic_games_url
+            nintendo_switch_url: $nintendo_switch_url
+            playstation_url: $playstation_url
+            google_play_store_url: $google_play_store_url
+            apple_app_store_url: $apple_app_store_url
+            website_url: $website_url
+        }
+    ) {
+        id
+    }
+}
