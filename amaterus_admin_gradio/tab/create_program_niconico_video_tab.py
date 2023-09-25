@@ -274,6 +274,7 @@ def create_create_program_niconico_video_tab(
                 thumbnail_url_text_field,
             ],
         )
+
         clear_project_field_button.add(
             components=[
                 project_drop,
