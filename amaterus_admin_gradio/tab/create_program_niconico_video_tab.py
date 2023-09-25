@@ -290,6 +290,12 @@ def create_create_program_niconico_video_tab(
             ],
         )
 
+        project_drop.select(
+            fn=handle_project_changed,
+            inputs=project_drop,
+            outputs=program_drop,
+        )
+
         fetch_niconico_video_data_button.click(
             fn=handle_fetch_niconico_video_data_button_clicked,
             inputs=[niconico_video_url_or_id_text_field],
@@ -319,12 +325,6 @@ def create_create_program_niconico_video_tab(
             outputs=[
                 added_program_niconico_video_id_text_field,
             ],
-        )
-
-        project_drop.select(
-            fn=handle_project_changed,
-            inputs=project_drop,
-            outputs=program_drop,
         )
 
     return tab
