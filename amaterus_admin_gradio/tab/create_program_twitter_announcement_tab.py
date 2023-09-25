@@ -309,12 +309,14 @@ def create_create_program_twitter_announcement_tab(
                 tweet_time_text_field,
             ],
         )
+
         clear_twitter_tweet_image_field_button.add(
             components=[
                 twitter_tweet_image_index_text_field,
                 twitter_tweet_image_url_text_field,
             ],
         )
+
         clear_project_field_button.add(
             components=[
                 project_drop,

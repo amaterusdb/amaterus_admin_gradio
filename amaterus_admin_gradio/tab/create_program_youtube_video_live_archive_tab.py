@@ -295,6 +295,7 @@ def create_create_program_youtube_video_live_archive_tab(
                 post_time_text_field,
             ],
         )
+
         clear_time_field_button.add(
             components=[
                 is_premiere_checkbox_field,
@@ -302,6 +303,7 @@ def create_create_program_youtube_video_live_archive_tab(
                 end_time_text_field,
             ]
         )
+
         clear_project_field_button.add(
             components=[
                 project_drop,

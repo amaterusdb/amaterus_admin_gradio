@@ -308,6 +308,7 @@ def create_create_program_youtube_live_live_archive_tab(
                 end_time_text_field,
             ],
         )
+
         clear_project_field_button.add(
             components=[
                 project_drop,
