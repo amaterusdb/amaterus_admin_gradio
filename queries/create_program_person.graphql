@@ -9,6 +9,12 @@ mutation CreateProgramPerson(
             person_id: $person_id
             is_absent: $is_absent
         }
+        on_conflict: {
+            constraint: program_persons_program_id_person_id_key
+            update_columns: [
+                is_absent
+            ]
+        }
     ) {
         id
     }
