@@ -26,6 +26,7 @@ class LaunchGradioArgument(BaseModel):
     hasura_admin_secret: str
     basic_auth_username: str | None
     basic_auth_password: str | None
+    state_session_capacity: int
 
 
 class AppConfig(BaseModel):
@@ -36,6 +37,7 @@ class AppConfig(BaseModel):
     hasura_admin_secret: str | None
     basic_auth_username: str | None
     basic_auth_password: str | None
+    state_session_capacity: int
 
 
 def launch_gradio(
@@ -47,6 +49,7 @@ def launch_gradio(
     youtube_api_key = args.youtube_api_key
     basic_auth_username = args.basic_auth_username
     basic_auth_password = args.basic_auth_password
+    state_session_capacity = args.state_session_capacity
 
     auth: tuple[str, str] | None = None
     if basic_auth_username is not None or basic_auth_password is not None:
@@ -105,6 +108,7 @@ def launch_gradio(
 
     demo.launch(
         auth=auth,
+        state_session_capacity=state_session_capacity,
     )
 
 
@@ -129,6 +133,19 @@ def load_app_config_from_env() -> AppConfig:
     if basic_auth_password is not None and len(basic_auth_password) == 0:
         basic_auth_password = None
 
+    state_session_capacity_string = os.environ.get(
+        "AMATERUS_ADMIN_GRADIO_STATE_SESSION_CAPACITY"
+    )
+    if (
+        state_session_capacity_string is not None
+        and len(state_session_capacity_string) == 0
+    ):
+        state_session_capacity_string = None
+
+    state_session_capacity = 10000
+    if state_session_capacity_string is not None:
+        state_session_capacity = int(state_session_capacity_string)
+
     log_level_string = os.environ.get("AMATERUS_ADMIN_GRADIO_LOG_LEVEL")
     log_level = logging.INFO
     if log_level_string is not None and len(log_level_string) > 0:
@@ -145,6 +162,7 @@ def load_app_config_from_env() -> AppConfig:
         hasura_admin_secret=hasura_admin_secret,
         basic_auth_username=basic_auth_username,
         basic_auth_password=basic_auth_password,
+        state_session_capacity=state_session_capacity,
         log_level=log_level,
         log_file=log_file,
     )
@@ -201,6 +219,11 @@ def main() -> None:
         type=str,
         default=app_config.basic_auth_password,
     )
+    parser.add_argument(
+        "--state_session_capacity",
+        type=int,
+        default=app_config.state_session_capacity,
+    )
 
     args = parser.parse_args()
 
@@ -211,6 +234,7 @@ def main() -> None:
     hasura_admin_secret: str = args.hasura_admin_secret
     basic_auth_username: str | None = args.basic_auth_username
     basic_auth_password: str | None = args.basic_auth_password
+    state_session_capacity: int = args.state_session_capacity
 
     logging.basicConfig(
         level=log_level,
@@ -230,6 +254,7 @@ def main() -> None:
             hasura_admin_secret=hasura_admin_secret,
             basic_auth_username=basic_auth_username,
             basic_auth_password=basic_auth_password,
+            state_session_capacity=state_session_capacity,
         ),
         logger=logger,
     )
