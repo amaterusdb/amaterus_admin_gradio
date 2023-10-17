@@ -1,0 +1,32 @@
+mutation CreateProgramTwitterAnnouncementWithoutImage(
+    $programId: uuid!
+    $personId: uuid!
+    $remoteTweetId: String!
+    $twitterAccountId: uuid!
+    $tweetTime: timestamptz!
+    $tweetEmbedHtml: String!
+) {
+    program_twitter_announcement: insert_program_twitter_announcements_one(
+        object: {
+            program_id: $programId
+            person_id: $personId
+            twitter_tweet: {
+                data: {
+                    remote_tweet_id: $remoteTweetId
+                    tweet_time: $tweetTime
+                    tweet_embed_html: $tweetEmbedHtml
+                    twitter_account_id: $twitterAccountId
+                }
+                on_conflict: {
+                    constraint: twitter_tweets_remote_tweet_id_key
+                    update_columns: [
+                        tweet_time
+                        tweet_embed_html
+                    ]
+                }
+            }
+        }
+    ) {
+        id
+    }
+}
