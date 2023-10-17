@@ -10,7 +10,11 @@ import gradio as gr
 import requests
 from pydantic import BaseModel
 
-from ..graphql_client import Client
+from ..graphql_client import (
+    Client,
+    CreateProgramTwitterAnnouncement,
+    CreateProgramTwitterAnnouncementWithoutImage,
+)
 
 JST = ZoneInfo("Asia/Tokyo")
 
@@ -283,16 +287,36 @@ def create_create_program_twitter_announcement_tab(
         ) -> Any:
             tweet_time = datetime.fromisoformat(tweet_time_string)
 
-            response = graphql_client.create_program_twitter_announcement(
-                program_id=program_id,
-                person_id=person_id,
-                remote_tweet_id=remote_tweet_id,
-                twitter_account_id=twitter_account_id,
-                tweet_time=tweet_time,
-                tweet_embed_html=tweet_embed_html,
-                twitter_tweet_image_index=int(twitter_tweet_image_index),
-                twitter_tweet_image_url=twitter_tweet_image_url,
+            response: (
+                CreateProgramTwitterAnnouncement
+                | CreateProgramTwitterAnnouncementWithoutImage
             )
+            if (
+                len(twitter_tweet_image_index) == 0
+                and len(twitter_tweet_image_url) == 0
+            ):
+                response = (
+                    graphql_client.create_program_twitter_announcement_without_image(
+                        program_id=program_id,
+                        person_id=person_id,
+                        remote_tweet_id=remote_tweet_id,
+                        twitter_account_id=twitter_account_id,
+                        tweet_time=tweet_time,
+                        tweet_embed_html=tweet_embed_html,
+                    )
+                )
+            else:
+                response = graphql_client.create_program_twitter_announcement(
+                    program_id=program_id,
+                    person_id=person_id,
+                    remote_tweet_id=remote_tweet_id,
+                    twitter_account_id=twitter_account_id,
+                    tweet_time=tweet_time,
+                    tweet_embed_html=tweet_embed_html,
+                    twitter_tweet_image_index=int(twitter_tweet_image_index),
+                    twitter_tweet_image_url=twitter_tweet_image_url,
+                )
+
             program_twitter_announcement = response.program_twitter_announcement
             if program_twitter_announcement is None:
                 raise Exception("program_twitter_announcement must not be None")
