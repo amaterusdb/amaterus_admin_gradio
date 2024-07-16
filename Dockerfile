@@ -84,6 +84,13 @@ RUN <<EOF
     useradd --non-unique --uid "${CONTAINER_UID}" --gid "${CONTAINER_GID}" --create-home user
 EOF
 
+RUN <<EOF
+    set -eu
+
+    mkdir -p /home/user/.cache
+    chown -R "${CONTAINER_UID}:${CONTAINER_GID}" /home/user/.cache
+EOF
+
 COPY --from=poetry-export-stage /work/requirements.txt /code/amaterus_admin_gradio/requirements.txt
 RUN --mount=type=cache,uid=${CONTAINER_UID},gid=${CONTAINER_GID},target=/home/user/.cache/pip <<EOF
     set -eu
