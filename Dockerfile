@@ -104,7 +104,7 @@ ADD ./amaterus_admin_gradio /code/amaterus_admin_gradio/amaterus_admin_gradio
 RUN --mount=type=cache,uid=${CONTAINER_UID},gid=${CONTAINER_GID},target=/home/user/.cache/pip <<EOF
     set -eu
 
-    gosu user pip install -e /code/amaterus_admin_gradio
+    gosu user pip install --no-deps -e /code/amaterus_admin_gradio
 EOF
 
 RUN <<EOF
