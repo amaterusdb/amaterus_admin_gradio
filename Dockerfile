@@ -28,9 +28,16 @@ RUN <<EOF
     gosu user pip install -r /requirements.txt
 EOF
 
-ADD ./scripts /code
-ADD ./amaterus_admin_gradio /code/amaterus_admin_gradio
+ADD ./pyproject.toml /code/amaterus_admin_gradio/
+ADD ./README.md /code/amaterus_admin_gradio/
+ADD ./amaterus_admin_gradio /code/amaterus_admin_gradio/amaterus_admin_gradio
+
+RUN <<EOF
+    set -eu
+
+    gosu user pip install -e /code/amaterus_admin_gradio
+EOF
 
 ENV GRADIO_SERVER_NAME=0.0.0.0
 
-CMD [ "gosu", "user", "python", "/code/main.py" ]
+ENTRYPOINT [ "gosu", "user", "python", "-m", "amaterus_admin_gradio" ]
