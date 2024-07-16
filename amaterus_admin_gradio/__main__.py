@@ -5,8 +5,11 @@ from logging import Logger
 from pathlib import Path
 
 import gradio as gr
-from amaterus_admin_gradio.graphql_client.client import Client
-from amaterus_admin_gradio.tab import (
+from dotenv import load_dotenv
+from pydantic import BaseModel
+
+from .graphql_client.client import Client
+from .tab import (
     create_create_game_tab,
     create_create_program_niconico_video_tab,
     create_create_program_person_tab,
@@ -15,9 +18,7 @@ from amaterus_admin_gradio.tab import (
     create_create_program_youtube_live_live_archive_tab,
     create_create_program_youtube_video_live_archive_tab,
 )
-from amaterus_admin_gradio.utility.logging_utility import setup_logger
-from dotenv import load_dotenv
-from pydantic import BaseModel
+from .utility.logging_utility import setup_logger
 
 
 class LaunchGradioArgument(BaseModel):

@@ -1,7 +1,7 @@
 # amaterus_admin_gradio
 
 ```shell
-poetry run python scripts/main.py --env_file .env
+poetry run python -m amaterus_admin_gradio --env_file .env
 ```
 
 ```shell
