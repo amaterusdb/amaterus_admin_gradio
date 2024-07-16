@@ -7,6 +7,8 @@ ENV PYTHONUNBUFFERED=1
 ENV PATH=/home/user/.local/bin:${PATH}
 
 RUN <<EOF
+    set -eu
+
     apt-get update
 
     apt-get install -y \
@@ -25,6 +27,8 @@ EOF
 
 ADD ./requirements.txt /
 RUN <<EOF
+    set -eu
+
     gosu user pip install -r /requirements.txt
 EOF
 
