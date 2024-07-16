@@ -67,13 +67,13 @@ trio = ["trio (<0.22)"]
 
 [[package]]
 name = "ariadne-codegen"
-version = "0.9.0"
+version = "0.13.0"
 description = "Generate fully typed GraphQL client from schema, queries and mutations!"
 optional = false
 python-versions = "*"
 files = [
-    {file = "ariadne_codegen-0.9.0-py2.py3-none-any.whl", hash = "sha256:d930333af151a346c02f395e3e6ee754abbd1c049018c05b41966a748a1f2dbe"},
-    {file = "ariadne_codegen-0.9.0.tar.gz", hash = "sha256:bd7132053e3772dadb6eb38ec3e73533bed97a03827e534b06475dff50f94eb5"},
+    {file = "ariadne_codegen-0.13.0-py2.py3-none-any.whl", hash = "sha256:61d0be4b1ba711bc5df35aaf0fa61d04cf4ea6f25a0038b687f845ab4f859a23"},
+    {file = "ariadne_codegen-0.13.0.tar.gz", hash = "sha256:52aa67037dcd88a2f6013118e69ba0ed35a49f37312668a1969907f0e9c9bf8b"},
 ]
 
 [package.dependencies]
@@ -89,6 +89,7 @@ websockets = {version = ">=11.0,<12.0", optional = true, markers = "extra == \"s
 
 [package.extras]
 dev = ["ariadne", "freezegun", "mypy", "pylint", "pytest", "pytest-asyncio", "pytest-httpx", "pytest-mock", "requests-toolbelt", "types-toml"]
+opentelemetry = ["opentelemetry-api"]
 subscriptions = ["websockets (>=11.0,<12.0)"]
 
 [[package]]
@@ -2458,4 +2459,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11"
-content-hash = "a879652adcc83132cc1a856adf8a8ccc706093547590c094f8fc35da60f75709"
+content-hash = "abdb0aed4019cadf70350b8844d42282925285c4b772765504a842b2d1a8abcb"
