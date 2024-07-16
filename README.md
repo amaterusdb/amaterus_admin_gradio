@@ -14,11 +14,6 @@ sudo docker build -t docker.aoirint.com/aoirint/amaterus_admin_gradio .
 sudo docker push docker.aoirint.com/aoirint/amaterus_admin_gradio
 ```
 
-```shell
-poetry export --without-hashes -o requirements.txt
-poetry export --without-hashes --with dev -o requirements-dev.txt
-```
-
 ## GraphQL Code Generation
 
 - Node 20
