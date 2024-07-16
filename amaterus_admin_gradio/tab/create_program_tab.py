@@ -60,7 +60,7 @@ def create_create_program_tab(
         def handle_tab_selected() -> Any:
             initial_data = graphql_client.get_create_program_initial_data()
             return [
-                gr.Dropdown.update(
+                gr.Dropdown(
                     choices=list(
                         map(
                             lambda project: (project.name, project.id),
@@ -68,7 +68,7 @@ def create_create_program_tab(
                         ),
                     ),
                 ),
-                gr.Dropdown.update(
+                gr.Dropdown(
                     choices=list(
                         map(
                             lambda game: (game.name, game.id),

@@ -32,7 +32,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "~3.11"
-gradio = "^3.44.3"
+gradio = "^4.38.1"
 requests = "^2.31.0"
 pydantic = "^2.3.0"
 python-dotenv = "^1.0.0"

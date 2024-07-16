@@ -160,7 +160,7 @@ def create_create_program_youtube_live_live_archive_tab(
                 graphql_client.get_create_program_youtube_live_live_archive_initial_data()
             )
             return [
-                gr.Dropdown.update(
+                gr.Dropdown(
                     choices=list(
                         map(
                             lambda project: (project.name, project.id),
@@ -168,7 +168,7 @@ def create_create_program_youtube_live_live_archive_tab(
                         ),
                     ),
                 ),
-                gr.Dropdown.update(
+                gr.Dropdown(
                     choices=list(
                         map(
                             lambda person: (person.name, person.id),
@@ -182,7 +182,7 @@ def create_create_program_youtube_live_live_archive_tab(
             project_id: str,
         ) -> Any:
             if project_id is None or len(project_id) == 0:
-                return gr.Dropdown.update(
+                return gr.Dropdown(
                     value=None,
                     choices=None,
                 )
@@ -191,12 +191,12 @@ def create_create_program_youtube_live_live_archive_tab(
                 project_id=project_id,
             ).project
             if project is None:
-                return gr.Dropdown.update(
+                return gr.Dropdown(
                     value=None,
                     choices=None,
                 )
 
-            return gr.Dropdown.update(
+            return gr.Dropdown(
                 choices=list(
                     map(
                         lambda program_project: (
