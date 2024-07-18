@@ -10,11 +10,7 @@ import gradio as gr
 import requests
 from pydantic import BaseModel
 
-from ..graphql_client import (
-    Client,
-    CreateProgramTwitterAnnouncement,
-    CreateProgramTwitterAnnouncementWithoutImage,
-)
+from ..graphql_client import Client
 
 JST = ZoneInfo("Asia/Tokyo")
 
@@ -287,37 +283,41 @@ def create_create_program_twitter_announcement_tab(
         ) -> Any:
             tweet_time = datetime.fromisoformat(tweet_time_string)
 
-            response: (
-                CreateProgramTwitterAnnouncement
-                | CreateProgramTwitterAnnouncementWithoutImage
+            response_tweet = graphql_client.create_twitter_tweet(
+                remote_tweet_id=remote_tweet_id,
+                twitter_account_id=twitter_account_id,
+                tweet_time=tweet_time,
+                tweet_embed_html=tweet_embed_html,
             )
-            if (
-                len(twitter_tweet_image_index) == 0
-                and len(twitter_tweet_image_url) == 0
-            ):
-                response = (
-                    graphql_client.create_program_twitter_announcement_without_image(
-                        program_id=program_id,
-                        person_id=person_id,
-                        remote_tweet_id=remote_tweet_id,
-                        twitter_account_id=twitter_account_id,
-                        tweet_time=tweet_time,
-                        tweet_embed_html=tweet_embed_html,
-                    )
-                )
-            else:
-                response = graphql_client.create_program_twitter_announcement(
-                    program_id=program_id,
-                    person_id=person_id,
-                    remote_tweet_id=remote_tweet_id,
-                    twitter_account_id=twitter_account_id,
-                    tweet_time=tweet_time,
-                    tweet_embed_html=tweet_embed_html,
+            if response_tweet.twitter_tweet is None:
+                raise Exception("twitter_tweet must not be None")
+
+            twitter_tweet_id = response_tweet.twitter_tweet.id
+
+            twitter_tweet_image_id: str | None = None
+            if len(twitter_tweet_image_index) != 0 or len(twitter_tweet_image_url) != 0:
+                response_tweet_image = graphql_client.create_twitter_tweet_image(
+                    twitter_tweet_id=twitter_tweet_id,
                     twitter_tweet_image_index=int(twitter_tweet_image_index),
                     twitter_tweet_image_url=twitter_tweet_image_url,
                 )
+                if response_tweet_image.twitter_tweet_image is None:
+                    raise Exception("twitter_tweet_image must not be None")
 
-            program_twitter_announcement = response.program_twitter_announcement
+                twitter_tweet_image_id = response_tweet_image.twitter_tweet_image.id
+
+            response_program_twitter_announcement = (
+                graphql_client.create_program_twitter_announcement(
+                    program_id=program_id,
+                    person_id=person_id,
+                    twitter_tweet_id=twitter_tweet_id,
+                    twitter_tweet_image_id=twitter_tweet_image_id,
+                )
+            )
+
+            program_twitter_announcement = (
+                response_program_twitter_announcement.program_twitter_announcement
+            )
             if program_twitter_announcement is None:
                 raise Exception("program_twitter_announcement must not be None")
 
