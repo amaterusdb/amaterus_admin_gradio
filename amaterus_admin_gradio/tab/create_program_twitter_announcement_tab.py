@@ -30,7 +30,7 @@ def fetch_twitter_tweet_oembed_data(
     remote_tweet_id: str | None = None
     if twitter_tweet_url_or_id.startswith("https://"):
         urlp = urlparse(twitter_tweet_url_or_id)
-        if urlp.netloc != "twitter.com":
+        if urlp.netloc != "twitter.com" and urlp.netloc != "x.com":
             raise Exception(f"Invalid URL: {twitter_tweet_url_or_id}")
 
         remote_tweet_id = os.path.basename(urlp.path)
