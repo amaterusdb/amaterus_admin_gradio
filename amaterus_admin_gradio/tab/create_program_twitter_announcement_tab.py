@@ -295,10 +295,7 @@ def create_create_program_twitter_announcement_tab(
             twitter_tweet_id = response_tweet.twitter_tweet.id
 
             twitter_tweet_image_id: str | None = None
-            if (
-                len(twitter_tweet_image_index) == 0
-                and len(twitter_tweet_image_url) == 0
-            ):
+            if len(twitter_tweet_image_index) != 0 or len(twitter_tweet_image_url) != 0:
                 response_tweet_image = graphql_client.create_twitter_tweet_image(
                     twitter_tweet_id=twitter_tweet_id,
                     twitter_tweet_image_index=int(twitter_tweet_image_index),
