@@ -1,45 +1,15 @@
 mutation CreateProgramTwitterAnnouncement(
     $programId: uuid!
     $personId: uuid!
-    $remoteTweetId: String!
-    $twitterAccountId: uuid!
-    $tweetTime: timestamptz!
-    $tweetEmbedHtml: String!
-    $twitterTweetImageIndex: Int!
-    $twitterTweetImageUrl: String!
+    $twitterTweetId: uuid!
+    $twitterTweetImageId: uuid
 ) {
     program_twitter_announcement: insert_program_twitter_announcements_one(
         object: {
             program_id: $programId
             person_id: $personId
-            twitter_tweet: {
-                data: {
-                    remote_tweet_id: $remoteTweetId
-                    tweet_time: $tweetTime
-                    tweet_embed_html: $tweetEmbedHtml
-                    twitter_account_id: $twitterAccountId
-                    twitter_tweet_images: {
-                        data: {
-                            index: $twitterTweetImageIndex
-                            url: $twitterTweetImageUrl
-                        }
-                        on_conflict: {
-                            constraint: twitter_tweet_images_tweet_id_index_key
-                            update_columns: [
-                                index
-                                url
-                            ]
-                        }
-                    }
-                }
-                on_conflict: {
-                    constraint: twitter_tweets_remote_tweet_id_key
-                    update_columns: [
-                        tweet_time
-                        tweet_embed_html
-                    ]
-                }
-            }
+            twitter_tweet_id: $twitterTweetId
+            twitter_tweet_image_id: $twitterTweetImageId
         }
     ) {
         id

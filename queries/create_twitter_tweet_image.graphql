@@ -1,0 +1,22 @@
+mutation CreateTwitterTweetImage(
+    $twitterTweetId: uuid!
+    $twitterTweetImageIndex: Int!
+    $twitterTweetImageUrl: String!
+) {
+    twitter_tweet_image: insert_twitter_tweet_images_one(
+        object: {
+            twitter_tweet_id: $twitterTweetId
+            index: $twitterTweetImageIndex
+            url: $twitterTweetImageUrl
+        }
+        on_conflict: {
+            constraint: twitter_tweet_images_tweet_id_index_key
+            update_columns: [
+                index
+                url
+            ]
+        }
+    ) {
+        id
+    }
+}

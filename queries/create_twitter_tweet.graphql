@@ -1,0 +1,24 @@
+mutation CreateTwitterTweet(
+    $remoteTweetId: String!
+    $twitterAccountId: uuid!
+    $tweetTime: timestamptz!
+    $tweetEmbedHtml: String!
+) {
+    twitter_tweet: insert_twitter_tweets_one(
+        object: {
+            remote_tweet_id: $remoteTweetId
+            tweet_time: $tweetTime
+            tweet_embed_html: $tweetEmbedHtml
+            twitter_account_id: $twitterAccountId
+        }
+        on_conflict: {
+            constraint: twitter_tweets_remote_tweet_id_key
+            update_columns: [
+                tweet_time
+                tweet_embed_html
+            ]
+        }
+    ) {
+        id
+    }
+}
