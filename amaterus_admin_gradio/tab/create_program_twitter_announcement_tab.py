@@ -10,11 +10,7 @@ import gradio as gr
 import requests
 from pydantic import BaseModel
 
-from ..graphql_client import (
-    Client,
-    CreateProgramTwitterAnnouncement,
-    CreateProgramTwitterAnnouncementWithoutImage,
-)
+from ..graphql_client import Client
 
 JST = ZoneInfo("Asia/Tokyo")
 
